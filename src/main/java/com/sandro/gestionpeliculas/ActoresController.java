@@ -145,14 +145,23 @@ public class ActoresController implements Initializable {
         btnGuardar.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
+    // --- AQUÍ ESTÁ EL ARREGLO (Igual que en Peliculas) ---
     @FXML
     void volverMenu(ActionEvent event) {
         try {
+            // 1. Cargar el idioma
+            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+
+            // 2. Pasárselo al cargador
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
+            loader.setResources(bundle); // <--- ¡SIN ESTO, FALLA!
+
             Parent root = loader.load();
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

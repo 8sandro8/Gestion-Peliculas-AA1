@@ -1,7 +1,10 @@
 package com.sandro.gestionpeliculas;
 
+import com.sandro.gestionpeliculas.dao.ActorDAO;
 import com.sandro.gestionpeliculas.dao.DirectorDAO;
 import com.sandro.gestionpeliculas.dao.PeliculaDAO;
+import com.sandro.gestionpeliculas.dao.RepartoDAO;
+import com.sandro.gestionpeliculas.modelo.Actor;
 import com.sandro.gestionpeliculas.modelo.Director;
 import com.sandro.gestionpeliculas.modelo.Pelicula;
 import javafx.collections.FXCollections;
@@ -10,12 +13,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -41,8 +46,6 @@ public class PeliculasController implements Initializable {
     @FXML private TextField txtPresupuesto;
     @FXML private DatePicker dateLanzamiento;
     @FXML private ComboBox<String> comboGenero;
-
-    // --- NUEVO: El desplegable de Directores ---
     @FXML private ComboBox<String> comboDirector;
 
     @FXML private CheckBox checkAdultos;
@@ -53,11 +56,17 @@ public class PeliculasController implements Initializable {
     @FXML private Button btnLimpiar;
     @FXML private Button btnVolver;
     @FXML private Button btnFoto;
+    @FXML private Button btnReparto;
 
     // --- VARIABLES GLOBALES ---
     private String rutaFotoSeleccionada = "";
+
+    // DAOs
     private PeliculaDAO peliculaDAO = new PeliculaDAO();
     private DirectorDAO directorDAO = new DirectorDAO();
+    private RepartoDAO repartoDAO = new RepartoDAO();
+    private ActorDAO actorDAO = new ActorDAO();
+
     private Pelicula peliculaSeleccionada = null;
     private ObservableList<Pelicula> listaMaster = FXCollections.observableArrayList();
 
@@ -68,15 +77,13 @@ public class PeliculasController implements Initializable {
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colDirector.setCellValueFactory(new PropertyValueFactory<>("idDirector"));
 
-        // 2. Rellenar Géneros
+        // 2. Rellenar Combos
         comboGenero.setItems(FXCollections.observableArrayList(
                 "Acción", "Comedia", "Drama", "Terror", "Ciencia Ficción", "Animación", "Thriller"
         ));
-
-        // 3. Rellenar Directores (¡IMPORTANTE!)
         cargarComboDirectores();
 
-        // 4. Cargar Pelis
+        // 3. Cargar Pelis
         cargarPeliculas();
 
         // Listeners
@@ -95,17 +102,10 @@ public class PeliculasController implements Initializable {
     // --- MÉTODOS AUXILIARES ---
 
     private void cargarComboDirectores() {
-        System.out.println("🔍 Intentando cargar directores en el combo...");
-
         List<Director> directores = directorDAO.obtenerTodos();
-        System.out.println("📊 Directores encontrados: " + directores.size());
-
         ObservableList<String> nombres = FXCollections.observableArrayList();
-
         for (Director d : directores) {
-            String etiqueta = d.getId() + " - " + d.getNombre();
-            System.out.println("   ➕ Añadido: " + etiqueta);
-            nombres.add(etiqueta);
+            nombres.add(d.getId() + " - " + d.getNombre());
         }
         comboDirector.setItems(nombres);
     }
@@ -116,7 +116,7 @@ public class PeliculasController implements Initializable {
             String[] partes = texto.split(" - ");
             return Integer.parseInt(partes[0]);
         }
-        return 1; // ID por defecto si falla algo
+        return 1;
     }
 
     private void seleccionarDirectorEnCombo(int idDirector) {
@@ -155,6 +155,7 @@ public class PeliculasController implements Initializable {
         txtPresupuesto.setText(String.valueOf(p.getPresupuesto()));
         dateLanzamiento.setValue(p.getFechaLanzamiento());
         checkAdultos.setSelected(p.isEsMas18());
+        comboGenero.setValue(null);
 
         seleccionarDirectorEnCombo(p.getIdDirector());
 
@@ -251,6 +252,70 @@ public class PeliculasController implements Initializable {
     }
 
     @FXML
+    void abrirGestionReparto(ActionEvent event) {
+        if (peliculaSeleccionada == null) {
+            mostrarAlerta("Aviso", "Selecciona una película primero.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Reparto: " + peliculaSeleccionada.getTitulo());
+        dialog.setHeaderText("Añadir actores a la película");
+
+        try {
+            dialog.getDialogPane().getStylesheets().add(getClass().getResource("estilos.css").toExternalForm());
+        } catch (Exception e) { System.out.println("No se pudo cargar CSS al diálogo"); }
+
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.getStyleClass().add("form-card");
+
+        Label lblActuales = new Label("Actores en el reparto:");
+        ListView<Actor> listActoresEnPeli = new ListView<>();
+        listActoresEnPeli.setPrefHeight(150);
+
+        List<Actor> actoresEnPeli = repartoDAO.obtenerActoresPorPelicula(peliculaSeleccionada.getId());
+        listActoresEnPeli.getItems().addAll(actoresEnPeli);
+
+        Button btnQuitar = new Button("Quitar Actor Seleccionado");
+        btnQuitar.getStyleClass().add("button-peligro");
+        btnQuitar.setOnAction(e -> {
+            Actor a = listActoresEnPeli.getSelectionModel().getSelectedItem();
+            if (a != null) {
+                repartoDAO.eliminarActorDePelicula(a.getId(), peliculaSeleccionada.getId());
+                listActoresEnPeli.getItems().remove(a);
+            }
+        });
+
+        Separator sep = new Separator();
+
+        Label lblAnadir = new Label("Añadir actor:");
+        ComboBox<Actor> comboTodosActores = new ComboBox<>();
+        comboTodosActores.getItems().addAll(actorDAO.obtenerTodos());
+        comboTodosActores.setPromptText("Selecciona un actor...");
+        comboTodosActores.setMaxWidth(Double.MAX_VALUE);
+
+        Button btnAnadir = new Button("Añadir al Reparto");
+        btnAnadir.setOnAction(e -> {
+            Actor actorElegido = comboTodosActores.getValue();
+            if (actorElegido != null) {
+                boolean exito = repartoDAO.anadirActorAPelicula(actorElegido.getId(), peliculaSeleccionada.getId());
+                if (exito) {
+                    listActoresEnPeli.getItems().add(actorElegido);
+                } else {
+                    mostrarAlerta("Info", "Este actor ya está en el reparto.");
+                }
+            }
+        });
+
+        layout.getChildren().addAll(lblActuales, listActoresEnPeli, btnQuitar, sep, lblAnadir, comboTodosActores, btnAnadir);
+        dialog.getDialogPane().setContent(layout);
+        dialog.showAndWait();
+    }
+
+    @FXML
     void limpiarFormulario(ActionEvent event) {
         txtTitulo.setText("");
         txtDuracion.setText("");
@@ -269,15 +334,25 @@ public class PeliculasController implements Initializable {
         btnGuardar.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
+    // --- AQUÍ ESTÁ EL ARREGLO ---
     @FXML
     void volverMenu(ActionEvent event) {
         try {
+            // 1. CARGAMOS EL IDIOMA (ResourceBundle)
+            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+
+            // 2. Cargamos el FXML pasándole el idioma
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
+            loader.setResources(bundle); // <--- ¡ESTA LÍNEA ES LA CLAVE!
+
             Parent root = loader.load();
+
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e) { e.printStackTrace(); }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {

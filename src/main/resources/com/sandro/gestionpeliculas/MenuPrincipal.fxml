@@ -3,25 +3,39 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" spacing="25.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.MenuPrincipalController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.MenuPrincipalController">
 
     <children>
-        <Label styleClass="titulo-principal" text="GESTIÓN DE CINE AA1">
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <padding>
+                <Insets right="20.0" top="20.0" />
+            </padding>
+
+            <Label style="-fx-text-fill: #a6adc8; -fx-font-size: 12px;" text="Idioma:" />
+
+            <Button mnemonicParsing="false" onAction="#cambiarEspanol" style="-fx-background-color: transparent; -fx-border-color: #f5c2e7; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold;" text="ES 🇪🇸" />
+            <Button mnemonicParsing="false" onAction="#cambiarIngles" style="-fx-background-color: transparent; -fx-border-color: #89b4fa; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold;" text="EN 🇺🇸" />
+        </HBox>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <Label styleClass="titulo-principal" text="%menu.titulo">
             <VBox.margin>
-                <Insets bottom="40.0" />
+                <Insets bottom="30.0" />
             </VBox.margin>
         </Label>
 
-        <Button mnemonicParsing="false" onAction="#irAPeliculas" prefHeight="60.0" prefWidth="300.0" style="-fx-font-size: 16px;" text="🎬 GESTIONAR PELÍCULAS" />
+        <Button mnemonicParsing="false" onAction="#irAPeliculas" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px; -fx-background-color: #89b4fa; -fx-text-fill: #1e1e2e; -fx-font-weight: 900;" text="%menu.peliculas" />
 
-        <Button mnemonicParsing="false" onAction="#irAArtistas" prefHeight="60.0" prefWidth="300.0" style="-fx-font-size: 16px;" text="🎭 GESTIONAR ARTISTAS" />
+        <Button mnemonicParsing="false" onAction="#irAArtistas" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px; -fx-background-color: #b4befe; -fx-text-fill: #1e1e2e; -fx-font-weight: 900;" text="%menu.artistas" />
 
-        <Button mnemonicParsing="false" onAction="#cerrarApp" prefHeight="60.0" prefWidth="300.0" styleClass="button-peligro" style="-fx-font-size: 16px;" text="❌ SALIR" />
+        <Button mnemonicParsing="false" onAction="#cerrarApp" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px;" styleClass="button-peligro" text="%menu.salir" />
+
+        <Region VBox.vgrow="ALWAYS" />
+
     </children>
-
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
 </VBox>

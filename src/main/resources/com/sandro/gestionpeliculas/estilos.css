@@ -1,4 +1,4 @@
-/* --- ESTILOS.CSS - VERSIÓN FINAL ALTO CONTRASTE --- */
+/* --- ESTILOS.CSS - VERSIÓN FINAL DEFINITIVA --- */
 
 /* 1. FONDO GENERAL */
 .root {
@@ -7,13 +7,12 @@
     -fx-font-size: 14px;
 }
 
-/* 2. TEXTOS GENERALES (Blanco Puro) */
+/* 2. TEXTOS GENERALES */
 .label, .text {
-    -fx-fill: white; /* Para textos gráficos */
-    -fx-text-fill: white; /* Para controles */
+    -fx-fill: white;
+    -fx-text-fill: white;
 }
 
-/* Título Principal */
 .titulo-principal {
     -fx-font-size: 32px;
     -fx-font-weight: 900;
@@ -24,7 +23,7 @@
 /* 3. CAMPOS DE TEXTO (Inputs) */
 .text-field, .date-picker > .text-field, .combo-box-base {
     -fx-background-color: #313244;
-    -fx-text-fill: white !important; /* FORZADO */
+    -fx-text-fill: white !important;
     -fx-prompt-text-fill: #a6adc8;
     -fx-background-radius: 6;
     -fx-border-color: #45475a;
@@ -37,7 +36,7 @@
     -fx-background-color: #36384a;
 }
 
-/* 4. TABLA (TableView) - CORRECCIÓN DE VISIBILIDAD */
+/* 4. TABLA (TableView) */
 .table-view {
     -fx-background-color: transparent;
     -fx-border-color: #45475a;
@@ -53,7 +52,6 @@
     -fx-font-weight: bold;
 }
 
-/* Celdas de la tabla */
 .table-row-cell {
     -fx-background-color: #1e1e2e;
 }
@@ -61,20 +59,17 @@
     -fx-background-color: #252535;
 }
 
-/* EL TEXTO DENTRO DE LAS CELDAS */
 .table-cell {
-    -fx-text-fill: white !important; /* BLANCO PURO FORZADO */
+    -fx-text-fill: white !important;
     -fx-alignment: CENTER-LEFT;
 }
-/* Aseguramos que el texto interno también sea blanco */
 .table-cell .text {
     -fx-fill: white !important;
 }
 
-/* Selección */
 .table-row-cell:selected, .table-row-cell:selected .table-cell {
     -fx-background-color: #89b4fa;
-    -fx-text-fill: #1e1e2e !important; /* Texto oscuro al seleccionar para que se lea */
+    -fx-text-fill: #1e1e2e !important;
 }
 .table-row-cell:selected .text {
     -fx-fill: #1e1e2e !important;
@@ -90,7 +85,6 @@
 }
 .button:hover { -fx-background-color: #b4befe; }
 
-/* Botón Outline (Volver) */
 .button-outline {
     -fx-background-color: transparent;
     -fx-border-color: #89b4fa;
@@ -103,17 +97,41 @@
     -fx-border-color: #b4befe;
 }
 
-/* Botón Peligro */
 .button-peligro {
     -fx-background-color: #f38ba8;
     -fx-text-fill: #3a151c;
 }
 
-/* Tarjetas */
 .form-card {
     -fx-background-color: #252535;
     -fx-padding: 20;
     -fx-background-radius: 15;
     -fx-border-color: #313244;
     -fx-border-width: 2px;
+}
+
+/* --- 6. ARREGLO DE LISTAS Y COMBOS (ListView / ComboBox Popup) --- */
+/* Esto arregla el fondo blanco en la ventana de Reparto */
+
+.list-view {
+    -fx-background-color: #313244; /* Fondo oscuro para la caja de la lista */
+    -fx-border-color: #45475a;
+    -fx-border-radius: 5;
+}
+
+.list-cell {
+    -fx-background-color: #313244; /* Fondo oscuro para cada elemento */
+    -fx-text-fill: white;           /* Texto blanco */
+    -fx-padding: 5 10 5 10;
+}
+
+/* Cuando pasas el ratón por encima */
+.list-cell:filled:hover {
+    -fx-background-color: #45475a;
+}
+
+/* Cuando seleccionas un elemento */
+.list-cell:filled:selected {
+    -fx-background-color: #89b4fa; /* Azul */
+    -fx-text-fill: #1e1e2e;         /* Texto oscuro */
 }
