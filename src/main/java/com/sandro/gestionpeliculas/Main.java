@@ -11,20 +11,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // 1. Cargar el diseño FXML que hiciste
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("MenuPrincipal.fxml"));
-
-        // 2. Crear la escena (el contenido de la ventana)
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
 
-        // 3. Poner título y mostrar la ventana
+        // --- NUEVA LÍNEA: APLICAR ESTILOS ---
+        scene.getStylesheets().add(getClass().getResource("estilos.css").toExternalForm());
+        // ------------------------------------
+
         stage.setTitle("Gestión de Cine - AA1");
         stage.setScene(scene);
         stage.show();
 
-        // 4. (Opcional) Dejamos el aviso de conexión en la consola por si acaso
         System.out.println("🚀 Aplicación iniciada...");
-        Connection con = ConexionBBDD.conectar();
+        // Connection con = ConexionBBDD.conectar(); // Esto ya lo usas dentro de los DAOs
     }
 
     public static void main(String[] args) {

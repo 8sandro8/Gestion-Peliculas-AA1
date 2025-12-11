@@ -1,0 +1,119 @@
+/* --- ESTILOS.CSS - VERSIÓN FINAL ALTO CONTRASTE --- */
+
+/* 1. FONDO GENERAL */
+.root {
+    -fx-background-color: #1e1e2e;
+    -fx-font-family: 'Segoe UI', system, sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* 2. TEXTOS GENERALES (Blanco Puro) */
+.label, .text {
+    -fx-fill: white; /* Para textos gráficos */
+    -fx-text-fill: white; /* Para controles */
+}
+
+/* Título Principal */
+.titulo-principal {
+    -fx-font-size: 32px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #f5c2e7;
+    -fx-effect: dropshadow(three-pass-box, rgba(245, 194, 231, 0.3), 15, 0, 0, 0);
+}
+
+/* 3. CAMPOS DE TEXTO (Inputs) */
+.text-field, .date-picker > .text-field, .combo-box-base {
+    -fx-background-color: #313244;
+    -fx-text-fill: white !important; /* FORZADO */
+    -fx-prompt-text-fill: #a6adc8;
+    -fx-background-radius: 6;
+    -fx-border-color: #45475a;
+    -fx-border-radius: 6;
+    -fx-padding: 8;
+}
+
+.text-field:focused, .date-picker:focused > .text-field, .combo-box-base:focused {
+    -fx-border-color: #89b4fa;
+    -fx-background-color: #36384a;
+}
+
+/* 4. TABLA (TableView) - CORRECCIÓN DE VISIBILIDAD */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #45475a;
+    -fx-border-width: 2px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #313244;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #89b4fa;
+    -fx-font-weight: bold;
+}
+
+/* Celdas de la tabla */
+.table-row-cell {
+    -fx-background-color: #1e1e2e;
+}
+.table-row-cell:odd {
+    -fx-background-color: #252535;
+}
+
+/* EL TEXTO DENTRO DE LAS CELDAS */
+.table-cell {
+    -fx-text-fill: white !important; /* BLANCO PURO FORZADO */
+    -fx-alignment: CENTER-LEFT;
+}
+/* Aseguramos que el texto interno también sea blanco */
+.table-cell .text {
+    -fx-fill: white !important;
+}
+
+/* Selección */
+.table-row-cell:selected, .table-row-cell:selected .table-cell {
+    -fx-background-color: #89b4fa;
+    -fx-text-fill: #1e1e2e !important; /* Texto oscuro al seleccionar para que se lea */
+}
+.table-row-cell:selected .text {
+    -fx-fill: #1e1e2e !important;
+}
+
+/* 5. BOTONES */
+.button {
+    -fx-background-color: #89b4fa;
+    -fx-text-fill: #1e1e2e;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.button:hover { -fx-background-color: #b4befe; }
+
+/* Botón Outline (Volver) */
+.button-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #89b4fa;
+    -fx-border-width: 2px;
+    -fx-text-fill: #89b4fa;
+}
+.button-outline:hover {
+    -fx-background-color: rgba(137, 180, 250, 0.1);
+    -fx-text-fill: #b4befe;
+    -fx-border-color: #b4befe;
+}
+
+/* Botón Peligro */
+.button-peligro {
+    -fx-background-color: #f38ba8;
+    -fx-text-fill: #3a151c;
+}
+
+/* Tarjetas */
+.form-card {
+    -fx-background-color: #252535;
+    -fx-padding: 20;
+    -fx-background-radius: 15;
+    -fx-border-color: #313244;
+    -fx-border-width: 2px;
+}
