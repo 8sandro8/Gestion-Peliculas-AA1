@@ -40,7 +40,22 @@ public class MenuPrincipalController {
 
     @FXML
     public void irAArtistas(ActionEvent actionEvent) {
-        System.out.println("🚧 Artistas: En construcción...");
+        try {
+            // Cambiamos a la vista de Directores (usaremos este botón para Directores por ahora)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("DirectoresView.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((javafx.scene.Node) actionEvent.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+            System.out.println("🎬 Navegando a Gestión de Directores...");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("❌ Error al cambiar de pantalla.");
+        }
     }
 
     @FXML

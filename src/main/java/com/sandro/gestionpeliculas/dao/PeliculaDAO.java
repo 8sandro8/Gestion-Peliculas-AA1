@@ -24,14 +24,18 @@ public class PeliculaDAO {
             st.setDouble(4, p.getPresupuesto());
             st.setBoolean(5, p.isEsMas18());
             st.setString(6, p.getCartelUrl());
-            st.setInt(7, 1); // ID Genero Temporal
-            st.setInt(8, 1); // ID Director Temporal
+
+            // --- CORRECCIÓN: YA NO PONEMOS 1 A FUEGO ---
+            st.setInt(7, p.getIdGenero());    // Usamos el ID real del objeto
+            st.setInt(8, p.getIdDirector());  // Usamos el ID real del objeto
+            // ------------------------------------------
 
             int filas = st.executeUpdate();
             st.close();
             con.close();
             return filas > 0;
         } catch (SQLException e) {
+            System.out.println("❌ Error al insertar: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -72,9 +76,8 @@ public class PeliculaDAO {
         return lista;
     }
 
-    // --- MÉTODO 3: ACTUALIZAR (¡NUEVO!) ---
+    // --- MÉTODO 3: ACTUALIZAR ---
     public boolean actualizar(Pelicula p) {
-        // Actualizamos todos los campos basándonos en el ID
         String sql = "UPDATE pelicula SET titulo=?, fecha_lanzamiento=?, duracion=?, presupuesto=?, es_mas_18=?, cartel_url=?, id_genero=?, id_director=? WHERE id=?";
 
         Connection con = ConexionBBDD.conectar();
@@ -88,11 +91,13 @@ public class PeliculaDAO {
             st.setDouble(4, p.getPresupuesto());
             st.setBoolean(5, p.isEsMas18());
             st.setString(6, p.getCartelUrl());
-            st.setInt(7, 1); // ID Genero Temporal
-            st.setInt(8, 1); // ID Director Temporal
 
-            // ¡IMPORTANTE! El ID va al final (en el WHERE)
-            st.setInt(9, p.getId());
+            // --- CORRECCIÓN AQUÍ TAMBIÉN ---
+            st.setInt(7, p.getIdGenero());    // ID Real
+            st.setInt(8, p.getIdDirector());  // ID Real
+            // -------------------------------
+
+            st.setInt(9, p.getId()); // El ID para el WHERE va al final
 
             int filas = st.executeUpdate();
             st.close();

@@ -1,6 +1,8 @@
 package com.sandro.gestionpeliculas;
 
+import com.sandro.gestionpeliculas.dao.DirectorDAO;
 import com.sandro.gestionpeliculas.dao.PeliculaDAO;
+import com.sandro.gestionpeliculas.modelo.Director;
 import com.sandro.gestionpeliculas.modelo.Pelicula;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,6 +41,10 @@ public class PeliculasController implements Initializable {
     @FXML private TextField txtPresupuesto;
     @FXML private DatePicker dateLanzamiento;
     @FXML private ComboBox<String> comboGenero;
+
+    // --- NUEVO: El desplegable de Directores ---
+    @FXML private ComboBox<String> comboDirector;
+
     @FXML private CheckBox checkAdultos;
     @FXML private ImageView imgCartel;
 
@@ -51,28 +57,29 @@ public class PeliculasController implements Initializable {
     // --- VARIABLES GLOBALES ---
     private String rutaFotoSeleccionada = "";
     private PeliculaDAO peliculaDAO = new PeliculaDAO();
-    private Pelicula peliculaSeleccionada = null; // Para saber cuál estamos editando
-
-    // Lista maestra para el buscador (guarda todas las pelis para no perderlas al filtrar)
+    private DirectorDAO directorDAO = new DirectorDAO();
+    private Pelicula peliculaSeleccionada = null;
     private ObservableList<Pelicula> listaMaster = FXCollections.observableArrayList();
 
-    // --- MÉTODO INITIALIZE (Arranca al abrir la ventana) ---
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // 1. Configurar columnas de la tabla
+        // 1. Configurar columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colDirector.setCellValueFactory(new PropertyValueFactory<>("idDirector"));
 
-        // 2. Rellenar ComboBox con géneros
+        // 2. Rellenar Géneros
         comboGenero.setItems(FXCollections.observableArrayList(
                 "Acción", "Comedia", "Drama", "Terror", "Ciencia Ficción", "Animación", "Thriller"
         ));
 
-        // 3. Cargar datos de la BBDD
+        // 3. Rellenar Directores (¡IMPORTANTE!)
+        cargarComboDirectores();
+
+        // 4. Cargar Pelis
         cargarPeliculas();
 
-        // 4. LISTENER TABLA: Detectar clic en una fila
+        // Listeners
         tablaPeliculas.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 peliculaSeleccionada = newSelection;
@@ -80,7 +87,6 @@ public class PeliculasController implements Initializable {
             }
         });
 
-        // 5. LISTENER BUSCADOR: Filtrar mientras escribes
         txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
             filtrarPeliculas(newValue);
         });
@@ -88,23 +94,52 @@ public class PeliculasController implements Initializable {
 
     // --- MÉTODOS AUXILIARES ---
 
+    private void cargarComboDirectores() {
+        System.out.println("🔍 Intentando cargar directores en el combo...");
+
+        List<Director> directores = directorDAO.obtenerTodos();
+        System.out.println("📊 Directores encontrados: " + directores.size());
+
+        ObservableList<String> nombres = FXCollections.observableArrayList();
+
+        for (Director d : directores) {
+            String etiqueta = d.getId() + " - " + d.getNombre();
+            System.out.println("   ➕ Añadido: " + etiqueta);
+            nombres.add(etiqueta);
+        }
+        comboDirector.setItems(nombres);
+    }
+
+    private int obtenerIdDirectorSeleccionado() {
+        String texto = comboDirector.getValue();
+        if (texto != null && texto.contains("-")) {
+            String[] partes = texto.split(" - ");
+            return Integer.parseInt(partes[0]);
+        }
+        return 1; // ID por defecto si falla algo
+    }
+
+    private void seleccionarDirectorEnCombo(int idDirector) {
+        for (String item : comboDirector.getItems()) {
+            if (item.startsWith(idDirector + " - ")) {
+                comboDirector.setValue(item);
+                return;
+            }
+        }
+    }
+
     private void cargarPeliculas() {
         tablaPeliculas.getItems().clear();
         List<Pelicula> lista = peliculaDAO.obtenerTodas();
-
-        // Guardamos la lista completa en la variable "Master" y en la tabla
         listaMaster = FXCollections.observableArrayList(lista);
         tablaPeliculas.setItems(listaMaster);
     }
 
     private void filtrarPeliculas(String texto) {
-        // Si borras el texto, mostramos todas de nuevo
         if (texto == null || texto.isEmpty()) {
             tablaPeliculas.setItems(listaMaster);
             return;
         }
-
-        // Creamos una lista temporal solo con las coincidencias
         ObservableList<Pelicula> filtro = FXCollections.observableArrayList();
         for (Pelicula p : listaMaster) {
             if (p.getTitulo().toLowerCase().contains(texto.toLowerCase())) {
@@ -115,14 +150,14 @@ public class PeliculasController implements Initializable {
     }
 
     private void mostrarDetallesPelicula(Pelicula p) {
-        // Rellenar campos
         txtTitulo.setText(p.getTitulo());
         txtDuracion.setText(String.valueOf(p.getDuracion()));
         txtPresupuesto.setText(String.valueOf(p.getPresupuesto()));
         dateLanzamiento.setValue(p.getFechaLanzamiento());
         checkAdultos.setSelected(p.isEsMas18());
 
-        // Mostrar imagen (controlando errores)
+        seleccionarDirectorEnCombo(p.getIdDirector());
+
         if (p.getCartelUrl() != null && !p.getCartelUrl().isEmpty()) {
             rutaFotoSeleccionada = p.getCartelUrl();
             try {
@@ -135,22 +170,18 @@ public class PeliculasController implements Initializable {
             rutaFotoSeleccionada = "";
         }
 
-        // CAMBIO VISUAL: Botón en modo "ACTUALIZAR"
         btnGuardar.setText("ACTUALIZAR");
         btnGuardar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
-    // --- MÉTODOS DE BOTONES ---
+    // --- ACCIONES DE BOTONES ---
 
     @FXML
     void seleccionarFoto(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Seleccionar Cartel");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg"));
-
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
-
         if (file != null) {
             rutaFotoSeleccionada = file.toURI().toString();
             imgCartel.setImage(new Image(rutaFotoSeleccionada));
@@ -161,7 +192,7 @@ public class PeliculasController implements Initializable {
     void guardarPelicula(ActionEvent event) {
         String titulo = txtTitulo.getText();
         if (titulo == null || titulo.isEmpty()) {
-            mostrarAlerta("Error", "El título es obligatorio");
+            mostrarAlerta("Error", "Título obligatorio");
             return;
         }
 
@@ -171,56 +202,50 @@ public class PeliculasController implements Initializable {
             boolean esMas18 = checkAdultos.isSelected();
             LocalDate fecha = dateLanzamiento.getValue();
             if (fecha == null) {
-                mostrarAlerta("Error", "La fecha es obligatoria");
+                mostrarAlerta("Error", "Fecha obligatoria");
                 return;
             }
 
-            // --- DECISIÓN: ¿CREAR O ACTUALIZAR? ---
+            int idDirector = obtenerIdDirectorSeleccionado();
+
             if (peliculaSeleccionada == null) {
-                // MODO CREAR (INSERT)
-                Pelicula nuevaPeli = new Pelicula(0, titulo, fecha, duracion, presupuesto, esMas18, rutaFotoSeleccionada, 1, 1);
-                if (peliculaDAO.insertar(nuevaPeli)) {
+                // CREAR
+                Pelicula nueva = new Pelicula(0, titulo, fecha, duracion, presupuesto, esMas18, rutaFotoSeleccionada, idDirector, 1);
+                if (peliculaDAO.insertar(nueva)) {
                     System.out.println("✅ Película creada.");
                     limpiarFormulario(null);
                     cargarPeliculas();
                 }
             } else {
-                // MODO EDITAR (UPDATE)
-                Pelicula peliEditada = new Pelicula(
-                        peliculaSeleccionada.getId(), // Mantenemos ID original
-                        titulo, fecha, duracion, presupuesto, esMas18, rutaFotoSeleccionada, 1, 1
+                // ACTUALIZAR
+                Pelicula editada = new Pelicula(
+                        peliculaSeleccionada.getId(),
+                        titulo, fecha, duracion, presupuesto, esMas18, rutaFotoSeleccionada,
+                        idDirector,
+                        1
                 );
-                if (peliculaDAO.actualizar(peliEditada)) {
+                if (peliculaDAO.actualizar(editada)) {
                     System.out.println("🔄 Película actualizada.");
                     limpiarFormulario(null);
                     cargarPeliculas();
                 }
             }
-
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error de formato", "Duración y Presupuesto deben ser números.");
+            mostrarAlerta("Error", "Revisa los números.");
         }
     }
 
     @FXML
     void eliminarPelicula(ActionEvent event) {
-        if (peliculaSeleccionada == null) {
-            mostrarAlerta("Aviso", "Selecciona una película para eliminar.");
-            return;
-        }
+        if (peliculaSeleccionada == null) return;
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar Película");
-        confirm.setHeaderText("¿Estás seguro de eliminar '" + peliculaSeleccionada.getTitulo() + "'?");
-        confirm.setContentText("Se borrarán también sus actores y valoraciones.");
-
+        confirm.setTitle("Eliminar");
+        confirm.setHeaderText("¿Borrar " + peliculaSeleccionada.getTitulo() + "?");
         if (confirm.showAndWait().get() == ButtonType.OK) {
             if (peliculaDAO.eliminar(peliculaSeleccionada.getId())) {
-                System.out.println("🗑️ Eliminada correctamente.");
                 limpiarFormulario(null);
                 cargarPeliculas();
-            } else {
-                mostrarAlerta("Error", "No se pudo eliminar la película.");
             }
         }
     }
@@ -232,15 +257,14 @@ public class PeliculasController implements Initializable {
         txtPresupuesto.setText("");
         dateLanzamiento.setValue(null);
         comboGenero.setValue(null);
+        comboDirector.setValue(null);
         checkAdultos.setSelected(false);
         imgCartel.setImage(null);
         rutaFotoSeleccionada = "";
 
-        // Resetear selección de tabla y variable
         tablaPeliculas.getSelectionModel().clearSelection();
         peliculaSeleccionada = null;
 
-        // CAMBIO VISUAL: Botón vuelve a modo "GUARDAR"
         btnGuardar.setText("GUARDAR");
         btnGuardar.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
     }
@@ -253,16 +277,12 @@ public class PeliculasController implements Initializable {
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    // Pequeño método para ahorrar código en las alertas
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
-        alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
