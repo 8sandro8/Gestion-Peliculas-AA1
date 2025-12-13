@@ -4,12 +4,15 @@ import com.sandro.gestionpeliculas.ConexionBBDD;
 import com.sandro.gestionpeliculas.modelo.Actor;
 
 import java.sql.*;
+import java.time.LocalDate; // <--- ¡ESTA ES LA LÍNEA QUE FALTABA!
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActorDAO {
 
-    // 1. LEER TODOS
+    // --- 1. MÉTODOS DE LECTURA (DOBLE NOMBRE PARA EVITAR ERRORES) ---
+
+    // Opción A: obtenerTodos
     public List<Actor> obtenerTodos() {
         List<Actor> lista = new ArrayList<>();
         String sql = "SELECT * FROM actor";
@@ -22,10 +25,16 @@ public class ActorDAO {
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
+                // Control de nulos para la fecha
+                LocalDate fecha = null;
+                if (rs.getDate("fecha_nacimiento") != null) {
+                    fecha = rs.getDate("fecha_nacimiento").toLocalDate();
+                }
+
                 Actor a = new Actor(
                         rs.getInt("id"),
                         rs.getString("nombre"),
-                        rs.getDate("fecha_nacimiento").toLocalDate(),
+                        fecha,
                         rs.getString("nacionalidad")
                 );
                 lista.add(a);
@@ -35,11 +44,17 @@ public class ActorDAO {
             con.close();
         } catch (SQLException e) {
             System.out.println("❌ Error al leer actores: " + e.getMessage());
+            e.printStackTrace();
         }
         return lista;
     }
 
-    // 2. INSERTAR
+    // Opción B: listarTodos (El puente)
+    public List<Actor> listarTodos() {
+        return obtenerTodos();
+    }
+
+    // --- 2. INSERTAR ---
     public boolean insertar(Actor a) {
         String sql = "INSERT INTO actor (nombre, fecha_nacimiento, nacionalidad) VALUES (?, ?, ?)";
 
@@ -49,7 +64,8 @@ public class ActorDAO {
         try {
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, a.getNombre());
-            st.setDate(2, Date.valueOf(a.getFechaNacimiento()));
+            // Convertimos LocalDate a Date de SQL
+            st.setDate(2, (a.getFechaNacimiento() != null) ? Date.valueOf(a.getFechaNacimiento()) : null);
             st.setString(3, a.getNacionalidad());
 
             int filas = st.executeUpdate();
@@ -58,11 +74,12 @@ public class ActorDAO {
             return filas > 0;
         } catch (SQLException e) {
             System.out.println("❌ Error al insertar actor: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
-    // 3. ACTUALIZAR
+    // --- 3. ACTUALIZAR ---
     public boolean actualizar(Actor a) {
         String sql = "UPDATE actor SET nombre=?, fecha_nacimiento=?, nacionalidad=? WHERE id=?";
 
@@ -72,9 +89,9 @@ public class ActorDAO {
         try {
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, a.getNombre());
-            st.setDate(2, Date.valueOf(a.getFechaNacimiento()));
+            st.setDate(2, (a.getFechaNacimiento() != null) ? Date.valueOf(a.getFechaNacimiento()) : null);
             st.setString(3, a.getNacionalidad());
-            st.setInt(4, a.getId()); // ID al final para el WHERE
+            st.setInt(4, a.getId());
 
             int filas = st.executeUpdate();
             st.close();
@@ -82,15 +99,14 @@ public class ActorDAO {
             return filas > 0;
         } catch (SQLException e) {
             System.out.println("❌ Error al actualizar actor: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
-    // 4. ELIMINAR (Con limpieza)
+    // --- 4. ELIMINAR ---
     public boolean eliminar(int id) {
-        // Primero borramos sus apariciones en películas (tabla 'actua')
         String sqlBorrarActuaciones = "DELETE FROM actua WHERE id_actor = ?";
-        // Luego borramos al actor
         String sqlBorrarActor = "DELETE FROM actor WHERE id = ?";
 
         Connection con = ConexionBBDD.conectar();
@@ -118,6 +134,7 @@ public class ActorDAO {
         } catch (SQLException e) {
             try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             System.out.println("❌ Error al eliminar actor: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

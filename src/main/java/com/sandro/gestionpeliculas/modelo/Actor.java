@@ -4,17 +4,19 @@ import java.time.LocalDate;
 
 public class Actor {
 
-    // Atributos
+    // --- ATRIBUTOS ---
     private int id;
     private String nombre;
     private LocalDate fechaNacimiento;
     private String nacionalidad;
 
-    // 1. CONSTRUCTOR VACÍO (Necesario a veces)
+    // --- CONSTRUCTORES ---
+
+    // 1. Constructor Vacío (Obligatorio)
     public Actor() {
     }
 
-    // 2. CONSTRUCTOR COMPLETO (¡ESTE ES EL QUE TE FALTA!)
+    // 2. Constructor Completo
     public Actor(int id, String nombre, LocalDate fechaNacimiento, String nacionalidad) {
         this.id = id;
         this.nombre = nombre;
@@ -22,40 +24,22 @@ public class Actor {
         this.nacionalidad = nacionalidad;
     }
 
-    // 3. GETTERS Y SETTERS (Para poder leer y escribir los datos)
-    public int getId() {
-        return id;
-    }
+    // --- GETTERS Y SETTERS ---
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public LocalDate getFechaNacimiento() { return fechaNacimiento; }
+    public void setFechaNacimiento(LocalDate fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
 
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
-    }
+    public String getNacionalidad() { return nacionalidad; }
+    public void setNacionalidad(String nacionalidad) { this.nacionalidad = nacionalidad; }
 
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
-    }
-
-    public String getNacionalidad() {
-        return nacionalidad;
-    }
-
-    public void setNacionalidad(String nacionalidad) {
-        this.nacionalidad = nacionalidad;
-    }
-
-    // Para que al imprimir salga bonito (opcional)
+    // --- TO STRING ---
+    // Importante para que en listas o combos salga el nombre y no un código raro
     @Override
     public String toString() {
         return nombre;

@@ -8,12 +8,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser; // Import necesario para el CSV
 import javafx.stage.Stage;
 
+import java.io.BufferedWriter; // Import necesario para escribir archivo
+import java.io.File;          // Import necesario para manejar archivo
+import java.io.FileWriter;    // Import necesario para escribir archivo
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -22,6 +27,7 @@ import java.util.ResourceBundle;
 
 public class ActoresController implements Initializable {
 
+    // --- ELEMENTOS DE LA VISTA ---
     @FXML private TextField txtBuscar;
     @FXML private TableView<Actor> tablaActores;
     @FXML private TableColumn<Actor, Integer> colId;
@@ -29,26 +35,24 @@ public class ActoresController implements Initializable {
     @FXML private TableColumn<Actor, String> colNacionalidad;
 
     @FXML private TextField txtNombre;
-    @FXML private DatePicker dateNacimiento;
+    @FXML private DatePicker dpFechaNacimiento;
     @FXML private TextField txtNacionalidad;
 
-    @FXML private Button btnGuardar;
-    @FXML private Button btnEliminar;
-    @FXML private Button btnLimpiar;
-    @FXML private Button btnVolver;
-
+    // --- VARIABLES DE DATOS ---
     private ActorDAO actorDAO = new ActorDAO();
     private Actor actorSeleccionado = null;
     private ObservableList<Actor> listaMaster = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Configurar columnas de la tabla
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colNacionalidad.setCellValueFactory(new PropertyValueFactory<>("nacionalidad"));
 
         cargarActores();
 
+        // Listener para seleccionar de la tabla
         tablaActores.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 actorSeleccionado = newSelection;
@@ -56,6 +60,7 @@ public class ActoresController implements Initializable {
             }
         });
 
+        // Listener para el buscador
         txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrarActores(newVal));
     }
 
@@ -83,85 +88,134 @@ public class ActoresController implements Initializable {
     private void mostrarDetalles(Actor a) {
         txtNombre.setText(a.getNombre());
         txtNacionalidad.setText(a.getNacionalidad());
-        dateNacimiento.setValue(a.getFechaNacimiento());
-
-        btnGuardar.setText("ACTUALIZAR");
-        btnGuardar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        dpFechaNacimiento.setValue(a.getFechaNacimiento());
     }
 
     @FXML
     void guardarActor(ActionEvent event) {
         String nombre = txtNombre.getText();
-        if (nombre == null || nombre.isEmpty()) return;
+        if (nombre == null || nombre.isEmpty()) {
+            mostrarAlerta("Error", "El nombre es obligatorio");
+            return;
+        }
 
-        LocalDate fecha = dateNacimiento.getValue();
-        if (fecha == null) return;
-
+        LocalDate fecha = dpFechaNacimiento.getValue();
         String nacionalidad = txtNacionalidad.getText();
 
         if (actorSeleccionado == null) {
-            // CREAR
+            // CREAR NUEVO
             Actor nuevo = new Actor(0, nombre, fecha, nacionalidad);
             if (actorDAO.insertar(nuevo)) {
+                mostrarAlerta("Éxito", "Actor guardado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
+            } else {
+                mostrarAlerta("Error", "No se pudo guardar el actor");
             }
         } else {
-            // ACTUALIZAR
+            // ACTUALIZAR EXISTENTE
             Actor editado = new Actor(actorSeleccionado.getId(), nombre, fecha, nacionalidad);
             if (actorDAO.actualizar(editado)) {
+                mostrarAlerta("Éxito", "Actor actualizado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
+            } else {
+                mostrarAlerta("Error", "No se pudo actualizar");
             }
         }
     }
 
     @FXML
     void eliminarActor(ActionEvent event) {
-        if (actorSeleccionado == null) return;
+        if (actorSeleccionado == null) {
+            mostrarAlerta("Aviso", "Selecciona un actor para eliminar");
+            return;
+        }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Eliminar");
         confirm.setHeaderText("¿Borrar a " + actorSeleccionado.getNombre() + "?");
 
-        if (confirm.showAndWait().get() == ButtonType.OK) {
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             if (actorDAO.eliminar(actorSeleccionado.getId())) {
+                mostrarAlerta("Eliminado", "Actor eliminado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
+            } else {
+                mostrarAlerta("Error", "No se pudo eliminar (puede que tenga películas asociadas)");
             }
         }
     }
 
     @FXML
     void limpiarFormulario(ActionEvent event) {
-        txtNombre.setText("");
-        txtNacionalidad.setText("");
-        dateNacimiento.setValue(null);
+        txtNombre.clear();
+        txtNacionalidad.clear();
+        dpFechaNacimiento.setValue(null);
 
         tablaActores.getSelectionModel().clearSelection();
         actorSeleccionado = null;
-
-        btnGuardar.setText("GUARDAR ACTOR");
-        btnGuardar.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
-    // --- AQUÍ ESTÁ EL ARREGLO (Igual que en Peliculas) ---
+    // --- MÉTODO NUEVO: EXPORTAR A CSV ---
     @FXML
-    void volverMenu(ActionEvent event) {
-        try {
-            // 1. Cargar el idioma
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+    void exportarCSV(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar Archivo CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos CSV", "*.csv"));
 
-            // 2. Pasárselo al cargador
+        // Nombre por defecto
+        fileChooser.setInitialFileName("actores.csv");
+
+        // Obtener la ventana actual para mostrar el diálogo encima
+        Stage stage = (Stage) txtBuscar.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                // Escribir cabecera
+                writer.write("ID;Nombre;Fecha Nacimiento;Nacionalidad");
+                writer.newLine();
+
+                // Recorrer la lista y escribir cada actor
+                for (Actor a : listaMaster) {
+                    // Preparamos los datos (cuidando que la fecha no sea null)
+                    String fechaStr = (a.getFechaNacimiento() != null) ? a.getFechaNacimiento().toString() : "";
+
+                    // Escribimos la línea con punto y coma
+                    writer.write(a.getId() + ";" + a.getNombre() + ";" + fechaStr + ";" + a.getNacionalidad());
+                    writer.newLine();
+                }
+                mostrarAlerta("Éxito", "Datos de actores exportados correctamente.");
+            } catch (IOException e) {
+                e.printStackTrace();
+                mostrarAlerta("Error", "No se pudo guardar el archivo: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    public void volverAlMenu(ActionEvent event) {
+        try {
+            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle); // <--- ¡SIN ESTO, FALLA!
+            loader.setResources(bundle);
 
             Parent root = loader.load();
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo volver al menú: " + e.getMessage());
         }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }
