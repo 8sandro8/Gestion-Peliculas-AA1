@@ -9,8 +9,10 @@ import java.util.List;
 
 public class DirectorDAO {
 
-    // 1. LEER TODOS (SELECT)
-    public List<Director> obtenerTodos() {
+    // --- MÉTODOS DE LECTURA (EL TRUCO PARA QUE FUNCIONEN AMBOS CONTROLADORES) ---
+
+    // OPCIÓN 1: listarTodos (La que usa PeliculasController)
+    public List<Director> listarTodos() {
         List<Director> lista = new ArrayList<>();
         String sql = "SELECT * FROM director";
 
@@ -22,94 +24,82 @@ public class DirectorDAO {
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
-                Director d = new Director(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getDate("fecha_nacimiento").toLocalDate(),
-                        rs.getString("nacionalidad"),
-                        rs.getString("web_oficial")
-                );
+                Director d = new Director();
+                d.setId(rs.getInt("id"));
+                d.setNombre(rs.getString("nombre"));
                 lista.add(d);
             }
             rs.close();
             st.close();
             con.close();
         } catch (SQLException e) {
-            System.out.println("❌ Error al leer directores: " + e.getMessage());
+            e.printStackTrace();
         }
         return lista;
     }
 
-    // 2. INSERTAR (CREATE)
+    // OPCIÓN 2: obtenerTodos (La que usa DirectoresController)
+    // ESTE ES EL QUE FALTABA. Simplemente llama al de arriba.
+    public List<Director> obtenerTodos() {
+        return listarTodos();
+    }
+
+    // -------------------------------------------------------------------
+
+    // --- INSERTAR ---
     public boolean insertar(Director d) {
-        String sql = "INSERT INTO director (nombre, fecha_nacimiento, nacionalidad, web_oficial) VALUES (?, ?, ?, ?)";
-
+        String sql = "INSERT INTO director (nombre) VALUES (?)";
         Connection con = ConexionBBDD.conectar();
         if (con == null) return false;
 
         try {
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, d.getNombre());
-            st.setDate(2, Date.valueOf(d.getFechaNacimiento()));
-            st.setString(3, d.getNacionalidad());
-            st.setString(4, d.getWebOficial());
-
             int filas = st.executeUpdate();
             st.close();
             con.close();
             return filas > 0;
         } catch (SQLException e) {
-            System.out.println("❌ Error al insertar director: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
-    // 3. ACTUALIZAR (UPDATE)
+    // --- ACTUALIZAR ---
     public boolean actualizar(Director d) {
-        String sql = "UPDATE director SET nombre=?, fecha_nacimiento=?, nacionalidad=?, web_oficial=? WHERE id=?";
-
+        String sql = "UPDATE director SET nombre=? WHERE id=?";
         Connection con = ConexionBBDD.conectar();
         if (con == null) return false;
 
         try {
             PreparedStatement st = con.prepareStatement(sql);
             st.setString(1, d.getNombre());
-            st.setDate(2, Date.valueOf(d.getFechaNacimiento()));
-            st.setString(3, d.getNacionalidad());
-            st.setString(4, d.getWebOficial());
-            st.setInt(5, d.getId()); // El ID va al final para el WHERE
-
+            st.setInt(2, d.getId());
             int filas = st.executeUpdate();
             st.close();
             con.close();
             return filas > 0;
         } catch (SQLException e) {
-            System.out.println("❌ Error al actualizar director: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
-    // 4. ELIMINAR (DELETE) - Con limpieza de películas huérfanas
+    // --- ELIMINAR ---
     public boolean eliminar(int id) {
-        // Antes de borrar al director, podríamos poner a NULL el director en sus películas
-        // para no borrar las películas enteras (eso sería muy destructivo).
-        String sqlDesvincularPeliculas = "UPDATE pelicula SET id_director = NULL WHERE id_director = ?";
-        String sqlBorrarDirector = "DELETE FROM director WHERE id = ?";
-
+        String sqlDesvincular = "UPDATE pelicula SET id_director = NULL WHERE id_director = ?";
+        String sqlBorrar = "DELETE FROM director WHERE id = ?";
         Connection con = ConexionBBDD.conectar();
         if (con == null) return false;
 
         try {
-            con.setAutoCommit(false); // Transacción
-
-            // A) Desvincular sus películas (se quedan sin director, pero no se borran)
-            PreparedStatement st1 = con.prepareStatement(sqlDesvincularPeliculas);
+            con.setAutoCommit(false);
+            PreparedStatement st1 = con.prepareStatement(sqlDesvincular);
             st1.setInt(1, id);
             st1.executeUpdate();
             st1.close();
 
-            // B) Borrar al director
-            PreparedStatement st2 = con.prepareStatement(sqlBorrarDirector);
+            PreparedStatement st2 = con.prepareStatement(sqlBorrar);
             st2.setInt(1, id);
             int filas = st2.executeUpdate();
             st2.close();
@@ -117,10 +107,8 @@ public class DirectorDAO {
             con.commit();
             con.close();
             return filas > 0;
-
         } catch (SQLException e) {
             try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            System.out.println("❌ Error al eliminar director: " + e.getMessage());
             return false;
         }
     }

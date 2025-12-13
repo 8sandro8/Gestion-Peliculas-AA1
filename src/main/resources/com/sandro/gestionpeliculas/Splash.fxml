@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #1e1e2e; -fx-border-color: #45475a; -fx-border-width: 2;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.SplashController">
+    <children>
+        <VBox alignment="CENTER" spacing="25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+
+                <ImageView fx:id="imgLogo" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@splash.jpg" />
+                    </image>
+
+                    <clip>
+                        <Rectangle arcHeight="30.0" arcWidth="30.0" height="200.0" width="200.0" />
+                    </clip>
+
+                    <effect>
+                        <DropShadow color="#000000aa" radius="15.0" spread="0.2" />
+                    </effect>
+                </ImageView>
+
+                <Label text="GESTIÓN DE CINE AA1" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Segoe UI';" />
+
+                <VBox alignment="CENTER" spacing="5.0">
+                    <ProgressBar fx:id="barraProgreso" prefHeight="10.0" prefWidth="400.0" progress="0.0" style="-fx-accent: #89b4fa; -fx-control-inner-background: #313244; -fx-text-box-border: transparent;" />
+
+                    <Label fx:id="lblEstado" text="Iniciando sistema..." style="-fx-text-fill: #a6adc8; -fx-font-size: 12px; -fx-font-style: italic;" />
+                </VBox>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

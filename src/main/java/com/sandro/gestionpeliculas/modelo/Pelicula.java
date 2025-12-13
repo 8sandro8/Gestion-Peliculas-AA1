@@ -4,50 +4,56 @@ import java.time.LocalDate;
 
 public class Pelicula {
 
-    // Atributos que coinciden con las columnas de tu tabla 'pelicula'
+    // ATRIBUTOS
     private int id;
     private String titulo;
-    private LocalDate fechaLanzamiento; // En SQL es DATE
     private int duracion;
-    private double presupuesto;         // En SQL es DECIMAL/FLOAT
-    private boolean esMas18;            // En SQL es BOOLEAN
+    private String genero;
+    private Director director;
+    private LocalDate fechaLanzamiento;
+    private double rating;
+    private boolean tieneOscar;
+
+    // NUEVOS CAMPOS DEL DAO
+    private double presupuesto;
+    private boolean esMas18;
     private String cartelUrl;
 
-    // IDs de las claves foráneas (para saber de quién es)
+    // IDs auxiliares
     private int idDirector;
     private int idGenero;
 
-    // CONSTRUCTOR VACÍO (Necesario a veces para librerías)
+    // CONSTRUCTOR VACÍO
     public Pelicula() {
     }
 
-    // CONSTRUCTOR COMPLETO (Para crear pelis nuevas)
-    public Pelicula(int id, String titulo, LocalDate fechaLanzamiento, int duracion, double presupuesto, boolean esMas18, String cartelUrl, int idDirector, int idGenero) {
-        this.id = id;
-        this.titulo = titulo;
-        this.fechaLanzamiento = fechaLanzamiento;
-        this.duracion = duracion;
-        this.presupuesto = presupuesto;
-        this.esMas18 = esMas18;
-        this.cartelUrl = cartelUrl;
-        this.idDirector = idDirector;
-        this.idGenero = idGenero;
-    }
-
-    // GETTERS Y SETTERS (Para poder leer y escribir los datos)
-    // Truco: En IntelliJ puedes generarlos con Alt+Insert -> Getter and Setter
-
+    // GETTERS Y SETTERS
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
 
+    public int getDuracion() { return duracion; }
+    public void setDuracion(int duracion) { this.duracion = duracion; }
+
+    public String getGenero() { return genero; }
+    public void setGenero(String genero) { this.genero = genero; }
+
+    public Director getDirector() { return director; }
+    public void setDirector(Director director) {
+        this.director = director;
+        if (director != null) this.idDirector = director.getId();
+    }
+
     public LocalDate getFechaLanzamiento() { return fechaLanzamiento; }
     public void setFechaLanzamiento(LocalDate fechaLanzamiento) { this.fechaLanzamiento = fechaLanzamiento; }
 
-    public int getDuracion() { return duracion; }
-    public void setDuracion(int duracion) { this.duracion = duracion; }
+    public double getRating() { return rating; }
+    public void setRating(double rating) { this.rating = rating; }
+
+    public boolean isTieneOscar() { return tieneOscar; }
+    public void setTieneOscar(boolean tieneOscar) { this.tieneOscar = tieneOscar; }
 
     public double getPresupuesto() { return presupuesto; }
     public void setPresupuesto(double presupuesto) { this.presupuesto = presupuesto; }
@@ -64,9 +70,18 @@ public class Pelicula {
     public int getIdGenero() { return idGenero; }
     public void setIdGenero(int idGenero) { this.idGenero = idGenero; }
 
-    // TOSTRING (Para imprimir la peli por consola y ver que tiene datos)
+    // MÉTODO CALCULADO: AÑO
+    public int getAnio() {
+        if (fechaLanzamiento != null) return fechaLanzamiento.getYear();
+        return 0;
+    }
+
+    public void setAnio(int anio) {
+        this.fechaLanzamiento = LocalDate.of(anio, 1, 1);
+    }
+
     @Override
     public String toString() {
-        return titulo + " (" + fechaLanzamiento.getYear() + ")";
+        return titulo + " (" + getAnio() + ")";
     }
 }
