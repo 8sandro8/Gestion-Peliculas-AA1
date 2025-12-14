@@ -28,6 +28,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;     // <--- IMPORTANTE PARA COPIAR FOTOS
+import java.nio.file.Path;      // <--- IMPORTANTE
+import java.nio.file.Paths;     // <--- IMPORTANTE
+import java.nio.file.StandardCopyOption; // <--- IMPORTANTE
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.Optional;
@@ -54,7 +58,9 @@ public class PeliculasController implements Initializable {
     private ObservableList<Pelicula> listaPeliculas;
     private PeliculaDAO peliculaDAO;
     private DirectorDAO directorDAO;
-    private File imagenSeleccionada;
+
+    // Guardamos el archivo que el usuario selecciona temporalmente
+    private File archivoImagenSeleccionado;
 
     // --- VARIABLE PARA IDIOMA ---
     private ResourceBundle resources;
@@ -62,7 +68,6 @@ public class PeliculasController implements Initializable {
     // --- INICIALIZACIÓN ---
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // 1. Capturamos el idioma actual para usarlo en el código Java (alertas, etc)
         this.resources = resourceBundle;
 
         peliculaDAO = new PeliculaDAO();
@@ -88,7 +93,6 @@ public class PeliculasController implements Initializable {
         colAnio.setCellValueFactory(new PropertyValueFactory<>("anio"));
         colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
 
-        // Columna personalizada para Director
         colDirector.setCellValueFactory(cellData -> {
             Director d = cellData.getValue().getDirector();
             if (d != null) {
@@ -107,9 +111,7 @@ public class PeliculasController implements Initializable {
             }
 
             @Override
-            public Director fromString(String string) {
-                return null;
-            }
+            public Director fromString(String string) { return null; }
         });
     }
 
@@ -131,16 +133,12 @@ public class PeliculasController implements Initializable {
         txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
             filtro.setPredicate(pelicula -> {
                 if (newValue == null || newValue.isEmpty()) return true;
-
                 String lowerCaseFilter = newValue.toLowerCase();
-
                 if (pelicula.getTitulo() != null && pelicula.getTitulo().toLowerCase().contains(lowerCaseFilter)) return true;
                 if (pelicula.getGenero() != null && pelicula.getGenero().toLowerCase().contains(lowerCaseFilter)) return true;
-
                 return false;
             });
         });
-
         tablaPeliculas.setItems(filtro);
     }
 
@@ -153,8 +151,11 @@ public class PeliculasController implements Initializable {
         txtDuracion.clear();
         txtGenero.clear();
         comboDirector.getSelectionModel().clearSelection();
+
+        // Limpiamos la imagen
         imgPoster.setImage(null);
-        imagenSeleccionada = null;
+        archivoImagenSeleccionado = null;
+
         tablaPeliculas.getSelectionModel().clearSelection();
     }
 
@@ -166,6 +167,27 @@ public class PeliculasController implements Initializable {
         txtDuracion.setText(String.valueOf(p.getDuracion()));
         txtGenero.setText(p.getGenero());
         comboDirector.setValue(p.getDirector());
+
+        // --- CARGAR IMAGEN ---
+        archivoImagenSeleccionado = null; // Reseteamos selección manual
+        if (p.getCartelUrl() != null && !p.getCartelUrl().isEmpty()) {
+            try {
+                // Buscamos la imagen en la carpeta 'imagenes' del proyecto
+                File file = new File(p.getCartelUrl());
+                if (file.exists()) {
+                    Image image = new Image(file.toURI().toString());
+                    imgPoster.setImage(image);
+                } else {
+                    // Si la ruta existe en BBDD pero el archivo no está
+                    imgPoster.setImage(null);
+                }
+            } catch (Exception e) {
+                System.out.println("Error cargando imagen: " + e.getMessage());
+                imgPoster.setImage(null);
+            }
+        } else {
+            imgPoster.setImage(null);
+        }
     }
 
     @FXML
@@ -175,10 +197,46 @@ public class PeliculasController implements Initializable {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
         );
+
+        // Abrir ventana de selección
         File file = fileChooser.showOpenDialog(null);
+
         if (file != null) {
-            imagenSeleccionada = file;
+            archivoImagenSeleccionado = file;
+            // Mostramos previsualización
             imgPoster.setImage(new Image(file.toURI().toString()));
+        }
+    }
+
+    // --- MÉTODO AUXILIAR PARA GUARDAR LA FOTO EN DISCO ---
+    private String copiarImagenAlProyecto(File archivoOriginal) {
+        try {
+            // 1. Crear carpeta si no existe
+            Path carpetaDestino = Paths.get("imagenes");
+            if (!Files.exists(carpetaDestino)) {
+                Files.createDirectories(carpetaDestino);
+            }
+
+            // 2. Definir nombre del archivo destino (ej: imagenes/avatar.jpg)
+            // Usamos System.currentTimeMillis() para evitar que se repitan nombres
+            String extension = "";
+            int i = archivoOriginal.getName().lastIndexOf('.');
+            if (i > 0) {
+                extension = archivoOriginal.getName().substring(i);
+            }
+            String nombreFinal = "poster_" + System.currentTimeMillis() + extension;
+
+            Path rutaDestino = carpetaDestino.resolve(nombreFinal);
+
+            // 3. Copiar el archivo
+            Files.copy(archivoOriginal.toPath(), rutaDestino, StandardCopyOption.REPLACE_EXISTING);
+
+            // 4. Devolver la ruta relativa como String para guardarla en BBDD
+            return rutaDestino.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -216,6 +274,16 @@ public class PeliculasController implements Initializable {
             peliculaGestor.setRating(5.0);
             peliculaGestor.setTieneOscar(false);
 
+            // --- LÓGICA DE IMAGEN ---
+            // Si el usuario seleccionó una imagen nueva, la guardamos
+            if (archivoImagenSeleccionado != null) {
+                String rutaGuardada = copiarImagenAlProyecto(archivoImagenSeleccionado);
+                if (rutaGuardada != null) {
+                    peliculaGestor.setCartelUrl(rutaGuardada);
+                }
+            }
+            // Si no seleccionó nada nuevo, mantenemos la que ya tenía (si es edición)
+
             if (seleccionada == null) {
                 if (peliculaDAO.insertar(peliculaGestor)) {
                     mostrarAlerta("alerta.titulo.info", "Película guardada correctamente", Alert.AlertType.INFORMATION);
@@ -250,11 +318,17 @@ public class PeliculasController implements Initializable {
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        // Usamos el texto del recurso para el título de la alerta
-        confirm.setTitle(resources.getString("alerta.titulo.aviso"));
-        confirm.setHeaderText(null);
-        // Usamos el texto del recurso para la pregunta
-        confirm.setContentText(resources.getString("alerta.confirmar.eliminar") + " \n(" + seleccionada.getTitulo() + ")");
+        try {
+            if (resources != null && resources.containsKey("alerta.titulo.aviso")) {
+                confirm.setTitle(resources.getString("alerta.titulo.aviso"));
+            } else { confirm.setTitle("Aviso"); }
+
+            String msg = (resources != null && resources.containsKey("alerta.confirmar.eliminar"))
+                    ? resources.getString("alerta.confirmar.eliminar")
+                    : "¿Estás seguro?";
+            confirm.setContentText(msg + " \n(" + seleccionada.getTitulo() + ")");
+
+        } catch (Exception e) { confirm.setTitle("Confirmar"); }
 
         Optional<ButtonType> result = confirm.showAndWait();
 
@@ -297,37 +371,30 @@ public class PeliculasController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            // USAMOS EL RECURSO ACTUAL PARA NO PERDER EL IDIOMA
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(this.resources); // <--- IMPORTANTE: Pasamos el idioma actual
+            loader.setResources(this.resources);
 
             Parent root = loader.load();
-
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
             mostrarAlerta("alerta.titulo.error", "No se pudo volver al menú: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-    // Método modificado para aceptar claves de recursos en el título
     private void mostrarAlerta(String claveTitulo, String contenido, Alert.AlertType tipo) {
         Alert alerta = new Alert(tipo);
-
-        // Intentamos traducir el título si existe la clave, si no, lo dejamos tal cual
         try {
             if (resources != null && resources.containsKey(claveTitulo)) {
                 alerta.setTitle(resources.getString(claveTitulo));
             } else {
-                alerta.setTitle(claveTitulo); // Si no es clave o falla, usa el texto directo
+                alerta.setTitle(claveTitulo);
             }
         } catch (Exception e) {
             alerta.setTitle(claveTitulo);
         }
-
         alerta.setHeaderText(null);
         alerta.setContentText(contenido);
         alerta.showAndWait();
