@@ -9,14 +9,13 @@ public class Actor {
     private String nombre;
     private LocalDate fechaNacimiento;
     private String nacionalidad;
+    private String fotoUrl; // <--- NUEVO CAMPO
 
     // --- CONSTRUCTORES ---
 
-    // 1. Constructor Vacío (Obligatorio)
     public Actor() {
     }
 
-    // 2. Constructor Completo
     public Actor(int id, String nombre, LocalDate fechaNacimiento, String nacionalidad) {
         this.id = id;
         this.nombre = nombre;
@@ -38,8 +37,9 @@ public class Actor {
     public String getNacionalidad() { return nacionalidad; }
     public void setNacionalidad(String nacionalidad) { this.nacionalidad = nacionalidad; }
 
-    // --- TO STRING ---
-    // Importante para que en listas o combos salga el nombre y no un código raro
+    public String getFotoUrl() { return fotoUrl; } // <--- NUEVO
+    public void setFotoUrl(String fotoUrl) { this.fotoUrl = fotoUrl; } // <--- NUEVO
+
     @Override
     public String toString() {
         return nombre;
