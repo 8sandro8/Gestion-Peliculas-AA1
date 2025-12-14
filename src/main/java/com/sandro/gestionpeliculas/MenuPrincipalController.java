@@ -3,26 +3,59 @@ package com.sandro.gestionpeliculas;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable; // <--- Importante
+import javafx.scene.Node;         // <--- Importante para (Node) event.getSource()
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;              // <--- Importante
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class MenuPrincipalController {
+// Implementamos Initializable para poder guardar el 'resources' al iniciar
+public class MenuPrincipalController implements Initializable {
+
+    // Variable para guardar el idioma actual
+    private ResourceBundle resources;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resources) {
+        // Capturamos el idioma que nos pasa el Splash o la pantalla anterior
+        this.resources = resources;
+    }
 
     // --- MÉTODOS DE NAVEGACIÓN ---
 
     @FXML
-    public void irAPeliculas(ActionEvent actionEvent) {
-        cambiarPantalla(actionEvent, "PeliculasView.fxml");
+    private void irAPeliculas(ActionEvent event) {
+        try {
+            // Ahora 'this.resources' ya no es null porque lo guardamos en el initialize
+            ResourceBundle idiomaActual = this.resources;
+
+            // Asegúrate de que este FXML existe. Si se llama 'PeliculasView.fxml', perfecto.
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("PeliculasView.fxml"));
+
+            // Pasamos el idioma a la siguiente pantalla
+            if (idiomaActual != null) {
+                loader.setResources(idiomaActual);
+            }
+
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     public void irAArtistas(ActionEvent actionEvent) {
-        // Redirigimos a la pantalla de Actores que ya tienes hecha
+        // Redirigimos a la pantalla de Actores
         cambiarPantalla(actionEvent, "ActoresView.fxml");
     }
 
@@ -31,7 +64,7 @@ public class MenuPrincipalController {
         System.exit(0);
     }
 
-    // --- NUEVO: MÉTODOS PARA CAMBIAR IDIOMA ---
+    // --- MÉTODOS PARA CAMBIAR IDIOMA ---
 
     @FXML
     public void cambiarEspanol(ActionEvent event) {
@@ -56,10 +89,10 @@ public class MenuPrincipalController {
 
             // 3. Recargamos la pantalla del menú
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle); // ¡Importante!
+            loader.setResources(bundle);
             Parent root = loader.load();
 
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 
@@ -72,14 +105,14 @@ public class MenuPrincipalController {
     // Método auxiliar para no repetir código al cambiar de pantalla
     private void cambiarPantalla(ActionEvent event, String fxml) {
         try {
-            // Siempre cargamos el idioma actual (sea cual sea el que esté puesto)
+            // Siempre cargamos el idioma actual
             ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             loader.setResources(bundle);
             Parent root = loader.load();
 
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 

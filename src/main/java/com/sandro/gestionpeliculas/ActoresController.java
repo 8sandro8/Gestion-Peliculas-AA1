@@ -13,12 +13,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.FileChooser; // Import necesario para el CSV
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter; // Import necesario para escribir archivo
-import java.io.File;          // Import necesario para manejar archivo
-import java.io.FileWriter;    // Import necesario para escribir archivo
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -43,8 +43,14 @@ public class ActoresController implements Initializable {
     private Actor actorSeleccionado = null;
     private ObservableList<Actor> listaMaster = FXCollections.observableArrayList();
 
+    // --- VARIABLE IDIOMA ---
+    private ResourceBundle resources;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // CAPTURAR EL IDIOMA ACTUAL
+        this.resources = resourceBundle;
+
         // Configurar columnas de la tabla
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
@@ -95,7 +101,7 @@ public class ActoresController implements Initializable {
     void guardarActor(ActionEvent event) {
         String nombre = txtNombre.getText();
         if (nombre == null || nombre.isEmpty()) {
-            mostrarAlerta("Error", "El nombre es obligatorio");
+            mostrarAlerta("alerta.titulo.error", "El nombre es obligatorio");
             return;
         }
 
@@ -106,21 +112,21 @@ public class ActoresController implements Initializable {
             // CREAR NUEVO
             Actor nuevo = new Actor(0, nombre, fecha, nacionalidad);
             if (actorDAO.insertar(nuevo)) {
-                mostrarAlerta("Éxito", "Actor guardado correctamente");
+                mostrarAlerta("alerta.titulo.info", "Actor guardado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
             } else {
-                mostrarAlerta("Error", "No se pudo guardar el actor");
+                mostrarAlerta("alerta.titulo.error", "No se pudo guardar el actor");
             }
         } else {
             // ACTUALIZAR EXISTENTE
             Actor editado = new Actor(actorSeleccionado.getId(), nombre, fecha, nacionalidad);
             if (actorDAO.actualizar(editado)) {
-                mostrarAlerta("Éxito", "Actor actualizado correctamente");
+                mostrarAlerta("alerta.titulo.info", "Actor actualizado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
             } else {
-                mostrarAlerta("Error", "No se pudo actualizar");
+                mostrarAlerta("alerta.titulo.error", "No se pudo actualizar");
             }
         }
     }
@@ -128,21 +134,26 @@ public class ActoresController implements Initializable {
     @FXML
     void eliminarActor(ActionEvent event) {
         if (actorSeleccionado == null) {
-            mostrarAlerta("Aviso", "Selecciona un actor para eliminar");
+            mostrarAlerta("alerta.titulo.aviso", "Selecciona un actor para eliminar");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar");
-        confirm.setHeaderText("¿Borrar a " + actorSeleccionado.getNombre() + "?");
+        // Usamos el recurso para el título
+        try {
+            confirm.setTitle(resources.getString("alerta.titulo.aviso"));
+        } catch (Exception e) { confirm.setTitle("Confirmar"); }
+
+        confirm.setHeaderText(null);
+        confirm.setContentText("¿Borrar a " + actorSeleccionado.getNombre() + "?");
 
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             if (actorDAO.eliminar(actorSeleccionado.getId())) {
-                mostrarAlerta("Eliminado", "Actor eliminado correctamente");
+                mostrarAlerta("alerta.titulo.info", "Actor eliminado correctamente");
                 limpiarFormulario(null);
                 cargarActores();
             } else {
-                mostrarAlerta("Error", "No se pudo eliminar (puede que tenga películas asociadas)");
+                mostrarAlerta("alerta.titulo.error", "No se pudo eliminar (puede que tenga películas asociadas)");
             }
         }
     }
@@ -157,39 +168,30 @@ public class ActoresController implements Initializable {
         actorSeleccionado = null;
     }
 
-    // --- MÉTODO NUEVO: EXPORTAR A CSV ---
     @FXML
     void exportarCSV(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Guardar Archivo CSV");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos CSV", "*.csv"));
-
-        // Nombre por defecto
         fileChooser.setInitialFileName("actores.csv");
 
-        // Obtener la ventana actual para mostrar el diálogo encima
         Stage stage = (Stage) txtBuscar.getScene().getWindow();
         File file = fileChooser.showSaveDialog(stage);
 
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                // Escribir cabecera
                 writer.write("ID;Nombre;Fecha Nacimiento;Nacionalidad");
                 writer.newLine();
 
-                // Recorrer la lista y escribir cada actor
                 for (Actor a : listaMaster) {
-                    // Preparamos los datos (cuidando que la fecha no sea null)
                     String fechaStr = (a.getFechaNacimiento() != null) ? a.getFechaNacimiento().toString() : "";
-
-                    // Escribimos la línea con punto y coma
                     writer.write(a.getId() + ";" + a.getNombre() + ";" + fechaStr + ";" + a.getNacionalidad());
                     writer.newLine();
                 }
-                mostrarAlerta("Éxito", "Datos de actores exportados correctamente.");
+                mostrarAlerta("alerta.titulo.info", "Datos de actores exportados correctamente.");
             } catch (IOException e) {
                 e.printStackTrace();
-                mostrarAlerta("Error", "No se pudo guardar el archivo: " + e.getMessage());
+                mostrarAlerta("alerta.titulo.error", "No se pudo guardar el archivo: " + e.getMessage());
             }
         }
     }
@@ -197,9 +199,9 @@ public class ActoresController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle);
+            // PASAMOS EL IDIOMA ACTUAL AL VOLVER
+            loader.setResources(this.resources);
 
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -207,13 +209,23 @@ public class ActoresController implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo volver al menú: " + e.getMessage());
+            mostrarAlerta("alerta.titulo.error", "No se pudo volver al menú: " + e.getMessage());
         }
     }
 
-    private void mostrarAlerta(String titulo, String mensaje) {
+    private void mostrarAlerta(String claveTitulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle(titulo);
+        // Intentamos traducir el título
+        try {
+            if (resources != null && resources.containsKey(claveTitulo)) {
+                alerta.setTitle(resources.getString(claveTitulo));
+            } else {
+                alerta.setTitle(claveTitulo);
+            }
+        } catch (Exception e) {
+            alerta.setTitle(claveTitulo);
+        }
+
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();

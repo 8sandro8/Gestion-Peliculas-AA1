@@ -1,4 +1,4 @@
-package com.sandro.gestionpeliculas; // Asegúrate de que esto coincide con tu paquete
+package com.sandro.gestionpeliculas;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,21 +6,22 @@ import java.sql.SQLException;
 
 public class ConexionBBDD {
 
-    // DATOS DE CONEXIÓN (Cámbialos si tu contraseña no es vacía)
+    // DATOS DE TU MARIADB
     private static final String URL = "jdbc:mariadb://localhost:3306/aa1";
     private static final String USER = "root";
-    private static final String PASSWORD = "Sandro.89"; // <--- PONE AQUÍ TU CONTRASEÑA DE DBeaver (si tienes)
+    private static final String PASSWORD = "Sandro.89";
 
+    // HE CAMBIADO EL NOMBRE A 'conectar' PARA QUE TUS DAOs FUNCIONEN
     public static Connection conectar() {
-        Connection conexion = null;
+        Connection con = null;
         try {
-            // Intentamos conectar
-            conexion = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("✅ ¡Conexión exitosa con la Base de Datos 'aa1'!");
-        } catch (SQLException e) {
-            System.out.println("❌ Error al conectar con la Base de Datos:");
+            Class.forName("org.mariadb.jdbc.Driver");
+            con = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("✅ ¡Conexión exitosa a MariaDB!");
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println("❌ Error al conectar con la base de datos");
             e.printStackTrace();
         }
-        return conexion;
+        return con;
     }
 }

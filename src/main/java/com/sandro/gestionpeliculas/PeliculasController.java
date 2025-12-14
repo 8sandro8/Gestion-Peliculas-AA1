@@ -1,15 +1,14 @@
 package com.sandro.gestionpeliculas;
 
-// Asegúrate de importar tu DirectorDAO
 import com.sandro.gestionpeliculas.dao.PeliculaDAO;
-import com.sandro.gestionpeliculas.dao.DirectorDAO; // <--- NUEVO
+import com.sandro.gestionpeliculas.dao.DirectorDAO;
 import com.sandro.gestionpeliculas.modelo.Pelicula;
 import com.sandro.gestionpeliculas.modelo.Director;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent; // <--- Para el botón volver
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -22,7 +21,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter; // <--- Para que el combo se vea bonito
+import javafx.util.StringConverter;
 
 import java.io.File;
 import java.io.BufferedWriter;
@@ -54,18 +53,24 @@ public class PeliculasController implements Initializable {
     // --- VARIABLES DE DATOS ---
     private ObservableList<Pelicula> listaPeliculas;
     private PeliculaDAO peliculaDAO;
-    private DirectorDAO directorDAO; // <--- NUEVO
+    private DirectorDAO directorDAO;
     private File imagenSeleccionada;
+
+    // --- VARIABLE PARA IDIOMA ---
+    private ResourceBundle resources;
 
     // --- INICIALIZACIÓN ---
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // 1. Capturamos el idioma actual para usarlo en el código Java (alertas, etc)
+        this.resources = resourceBundle;
+
         peliculaDAO = new PeliculaDAO();
-        directorDAO = new DirectorDAO(); // <--- INICIAMOS EL DAO DE DIRECTORES
+        directorDAO = new DirectorDAO();
         listaPeliculas = FXCollections.observableArrayList();
 
         configurarTabla();
-        configurarComboDirector(); // <--- CONFIGURAMOS EL COMBO
+        configurarComboDirector();
         cargarDatos();
         configurarBuscador();
 
@@ -94,7 +99,6 @@ public class PeliculasController implements Initializable {
         });
     }
 
-    // NUEVO: Para que en el desplegable salgan los nombres y no códigos raros
     private void configurarComboDirector() {
         comboDirector.setConverter(new StringConverter<Director>() {
             @Override
@@ -104,7 +108,7 @@ public class PeliculasController implements Initializable {
 
             @Override
             public Director fromString(String string) {
-                return null; // No necesario para selección
+                return null;
             }
         });
     }
@@ -114,10 +118,7 @@ public class PeliculasController implements Initializable {
         listaPeliculas.addAll(peliculaDAO.listarTodas());
         tablaPeliculas.setItems(listaPeliculas);
 
-        // --- AQUÍ CARGAMOS LOS DIRECTORES EN EL COMBOBOX ---
-        // Asumo que tu DirectorDAO tiene un método 'listarTodos' o 'obtenerTodos'
         try {
-            // Si te da error en .listarTodos(), prueba con .obtenerTodos()
             comboDirector.setItems(FXCollections.observableArrayList(directorDAO.listarTodos()));
         } catch (Exception e) {
             System.out.println("Error al cargar directores: " + e.getMessage());
@@ -164,12 +165,7 @@ public class PeliculasController implements Initializable {
         txtAnio.setText(String.valueOf(p.getAnio()));
         txtDuracion.setText(String.valueOf(p.getDuracion()));
         txtGenero.setText(p.getGenero());
-
-        // Seleccionamos el director en el combo
         comboDirector.setValue(p.getDirector());
-
-        // Cargar imagen si existiera ruta (Opcional)
-        // if (p.getCartelUrl() != null) imgPoster.setImage(new Image(p.getCartelUrl()));
     }
 
     @FXML
@@ -189,7 +185,7 @@ public class PeliculasController implements Initializable {
     @FXML
     public void guardarPelicula() {
         if (txtTitulo.getText().isEmpty() || txtAnio.getText().isEmpty()) {
-            mostrarAlerta("Error", "El título y el año son obligatorios", Alert.AlertType.ERROR);
+            mostrarAlerta("alerta.titulo.error", "El título y el año son obligatorios", Alert.AlertType.ERROR);
             return;
         }
 
@@ -217,22 +213,20 @@ public class PeliculasController implements Initializable {
             peliculaGestor.setGenero(genero);
             peliculaGestor.setDirector(director);
             peliculaGestor.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
-
-            // Valores por defecto
             peliculaGestor.setRating(5.0);
             peliculaGestor.setTieneOscar(false);
 
             if (seleccionada == null) {
                 if (peliculaDAO.insertar(peliculaGestor)) {
-                    mostrarAlerta("Éxito", "Película guardada correctamente", Alert.AlertType.INFORMATION);
+                    mostrarAlerta("alerta.titulo.info", "Película guardada correctamente", Alert.AlertType.INFORMATION);
                 } else {
-                    mostrarAlerta("Error", "No se pudo guardar la película", Alert.AlertType.ERROR);
+                    mostrarAlerta("alerta.titulo.error", "No se pudo guardar la película", Alert.AlertType.ERROR);
                 }
             } else {
                 if (peliculaDAO.actualizar(peliculaGestor)) {
-                    mostrarAlerta("Éxito", "Película actualizada correctamente", Alert.AlertType.INFORMATION);
+                    mostrarAlerta("alerta.titulo.info", "Película actualizada correctamente", Alert.AlertType.INFORMATION);
                 } else {
-                    mostrarAlerta("Error", "No se pudo actualizar", Alert.AlertType.ERROR);
+                    mostrarAlerta("alerta.titulo.error", "No se pudo actualizar", Alert.AlertType.ERROR);
                 }
             }
 
@@ -240,9 +234,9 @@ public class PeliculasController implements Initializable {
             limpiarFormulario();
 
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "El año y la duración deben ser números enteros", Alert.AlertType.ERROR);
+            mostrarAlerta("alerta.titulo.error", "El año y la duración deben ser números enteros", Alert.AlertType.ERROR);
         } catch (Exception e) {
-            mostrarAlerta("Error", "Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
+            mostrarAlerta("alerta.titulo.error", "Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }
@@ -251,22 +245,26 @@ public class PeliculasController implements Initializable {
     public void eliminarPelicula() {
         Pelicula seleccionada = tablaPeliculas.getSelectionModel().getSelectedItem();
         if (seleccionada == null) {
-            mostrarAlerta("Aviso", "Selecciona una película para eliminar", Alert.AlertType.WARNING);
+            mostrarAlerta("alerta.titulo.aviso", "Selecciona una película para eliminar", Alert.AlertType.WARNING);
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmar Borrado");
-        confirm.setHeaderText("¿Eliminar " + seleccionada.getTitulo() + "?");
+        // Usamos el texto del recurso para el título de la alerta
+        confirm.setTitle(resources.getString("alerta.titulo.aviso"));
+        confirm.setHeaderText(null);
+        // Usamos el texto del recurso para la pregunta
+        confirm.setContentText(resources.getString("alerta.confirmar.eliminar") + " \n(" + seleccionada.getTitulo() + ")");
+
         Optional<ButtonType> result = confirm.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (peliculaDAO.eliminar(seleccionada.getId())) {
                 cargarDatos();
                 limpiarFormulario();
-                mostrarAlerta("Eliminado", "Película eliminada correctamente", Alert.AlertType.INFORMATION);
+                mostrarAlerta("alerta.titulo.info", "Película eliminada correctamente", Alert.AlertType.INFORMATION);
             } else {
-                mostrarAlerta("Error", "No se pudo eliminar la película", Alert.AlertType.ERROR);
+                mostrarAlerta("alerta.titulo.error", "No se pudo eliminar la película", Alert.AlertType.ERROR);
             }
         }
     }
@@ -289,9 +287,9 @@ public class PeliculasController implements Initializable {
                             p.getId(), p.getTitulo(), nombreDirector, p.getAnio(), p.getDuracion(), p.getGenero());
                     writer.write(linea);
                 }
-                mostrarAlerta("Éxito", "Exportado correctamente", Alert.AlertType.INFORMATION);
+                mostrarAlerta("alerta.titulo.info", "Exportado correctamente", Alert.AlertType.INFORMATION);
             } catch (Exception e) {
-                mostrarAlerta("Error", "Fallo al exportar: " + e.getMessage(), Alert.AlertType.ERROR);
+                mostrarAlerta("alerta.titulo.error", "Fallo al exportar: " + e.getMessage(), Alert.AlertType.ERROR);
             }
         }
     }
@@ -299,11 +297,9 @@ public class PeliculasController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            // CAMBIO AQUÍ: Añadimos la ruta completa del paquete
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
-
+            // USAMOS EL RECURSO ACTUAL PARA NO PERDER EL IDIOMA
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle);
+            loader.setResources(this.resources); // <--- IMPORTANTE: Pasamos el idioma actual
 
             Parent root = loader.load();
 
@@ -313,17 +309,25 @@ public class PeliculasController implements Initializable {
 
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo volver al menú: " + e.getMessage(), Alert.AlertType.ERROR);
-        } catch (Exception e) {
-            // Capturamos el error específico de recursos para que sepas qué pasa
-            e.printStackTrace();
-            mostrarAlerta("Error", "Falta el archivo de textos: " + e.getMessage(), Alert.AlertType.ERROR);
+            mostrarAlerta("alerta.titulo.error", "No se pudo volver al menú: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-    private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
+    // Método modificado para aceptar claves de recursos en el título
+    private void mostrarAlerta(String claveTitulo, String contenido, Alert.AlertType tipo) {
         Alert alerta = new Alert(tipo);
-        alerta.setTitle(titulo);
+
+        // Intentamos traducir el título si existe la clave, si no, lo dejamos tal cual
+        try {
+            if (resources != null && resources.containsKey(claveTitulo)) {
+                alerta.setTitle(resources.getString(claveTitulo));
+            } else {
+                alerta.setTitle(claveTitulo); // Si no es clave o falla, usa el texto directo
+            }
+        } catch (Exception e) {
+            alerta.setTitle(claveTitulo);
+        }
+
         alerta.setHeaderText(null);
         alerta.setContentText(contenido);
         alerta.showAndWait();
