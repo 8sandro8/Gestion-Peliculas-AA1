@@ -20,6 +20,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality; // IMPORTANTE PARA VENTANA EMERGENTE
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -28,10 +29,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;     // <--- IMPORTANTE PARA COPIAR FOTOS
-import java.nio.file.Path;      // <--- IMPORTANTE
-import java.nio.file.Paths;     // <--- IMPORTANTE
-import java.nio.file.StandardCopyOption; // <--- IMPORTANTE
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.Optional;
@@ -58,11 +59,7 @@ public class PeliculasController implements Initializable {
     private ObservableList<Pelicula> listaPeliculas;
     private PeliculaDAO peliculaDAO;
     private DirectorDAO directorDAO;
-
-    // Guardamos el archivo que el usuario selecciona temporalmente
     private File archivoImagenSeleccionado;
-
-    // --- VARIABLE PARA IDIOMA ---
     private ResourceBundle resources;
 
     // --- INICIALIZACIÓN ---
@@ -151,11 +148,8 @@ public class PeliculasController implements Initializable {
         txtDuracion.clear();
         txtGenero.clear();
         comboDirector.getSelectionModel().clearSelection();
-
-        // Limpiamos la imagen
         imgPoster.setImage(null);
         archivoImagenSeleccionado = null;
-
         tablaPeliculas.getSelectionModel().clearSelection();
     }
 
@@ -168,21 +162,17 @@ public class PeliculasController implements Initializable {
         txtGenero.setText(p.getGenero());
         comboDirector.setValue(p.getDirector());
 
-        // --- CARGAR IMAGEN ---
-        archivoImagenSeleccionado = null; // Reseteamos selección manual
+        archivoImagenSeleccionado = null;
         if (p.getCartelUrl() != null && !p.getCartelUrl().isEmpty()) {
             try {
-                // Buscamos la imagen en la carpeta 'imagenes' del proyecto
                 File file = new File(p.getCartelUrl());
                 if (file.exists()) {
                     Image image = new Image(file.toURI().toString());
                     imgPoster.setImage(image);
                 } else {
-                    // Si la ruta existe en BBDD pero el archivo no está
                     imgPoster.setImage(null);
                 }
             } catch (Exception e) {
-                System.out.println("Error cargando imagen: " + e.getMessage());
                 imgPoster.setImage(null);
             }
         } else {
@@ -197,41 +187,27 @@ public class PeliculasController implements Initializable {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
         );
-
-        // Abrir ventana de selección
         File file = fileChooser.showOpenDialog(null);
-
         if (file != null) {
             archivoImagenSeleccionado = file;
-            // Mostramos previsualización
             imgPoster.setImage(new Image(file.toURI().toString()));
         }
     }
 
-    // --- MÉTODO AUXILIAR PARA GUARDAR LA FOTO EN DISCO ---
     private String copiarImagenAlProyecto(File archivoOriginal) {
         try {
-            // 1. Crear carpeta si no existe
             Path carpetaDestino = Paths.get("imagenes");
             if (!Files.exists(carpetaDestino)) {
                 Files.createDirectories(carpetaDestino);
             }
-
-            // 2. Definir nombre del archivo destino (ej: imagenes/avatar.jpg)
-            // Usamos System.currentTimeMillis() para evitar que se repitan nombres
             String extension = "";
             int i = archivoOriginal.getName().lastIndexOf('.');
-            if (i > 0) {
-                extension = archivoOriginal.getName().substring(i);
-            }
-            String nombreFinal = "poster_" + System.currentTimeMillis() + extension;
+            if (i > 0) extension = archivoOriginal.getName().substring(i);
 
+            String nombreFinal = "poster_" + System.currentTimeMillis() + extension;
             Path rutaDestino = carpetaDestino.resolve(nombreFinal);
 
-            // 3. Copiar el archivo
             Files.copy(archivoOriginal.toPath(), rutaDestino, StandardCopyOption.REPLACE_EXISTING);
-
-            // 4. Devolver la ruta relativa como String para guardarla en BBDD
             return rutaDestino.toString();
 
         } catch (IOException e) {
@@ -274,15 +250,12 @@ public class PeliculasController implements Initializable {
             peliculaGestor.setRating(5.0);
             peliculaGestor.setTieneOscar(false);
 
-            // --- LÓGICA DE IMAGEN ---
-            // Si el usuario seleccionó una imagen nueva, la guardamos
             if (archivoImagenSeleccionado != null) {
                 String rutaGuardada = copiarImagenAlProyecto(archivoImagenSeleccionado);
                 if (rutaGuardada != null) {
                     peliculaGestor.setCartelUrl(rutaGuardada);
                 }
             }
-            // Si no seleccionó nada nuevo, mantenemos la que ya tenía (si es edición)
 
             if (seleccionada == null) {
                 if (peliculaDAO.insertar(peliculaGestor)) {
@@ -381,6 +354,36 @@ public class PeliculasController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
             mostrarAlerta("alerta.titulo.error", "No se pudo volver al menú: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    // --- NUEVO MÉTODO PARA ABRIR EL REPARTO ---
+    @FXML
+    public void gestionarReparto(ActionEvent event) {
+        Pelicula seleccionada = tablaPeliculas.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAlerta("alerta.titulo.aviso", "Selecciona una película primero", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("RepartoView.fxml"));
+            // (Opcional) Si quisieras pasar el idioma también: loader.setResources(this.resources);
+
+            Parent root = loader.load();
+
+            RepartoController controller = loader.getController();
+            controller.initData(seleccionada);
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Reparto");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana de atrás
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta("alerta.titulo.error", "Error al abrir reparto: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
