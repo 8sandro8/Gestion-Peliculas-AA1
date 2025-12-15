@@ -3,39 +3,45 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.MenuPrincipalController">
-
+<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.MenuPrincipalController">
     <children>
-        <HBox alignment="CENTER_RIGHT" spacing="10.0">
-            <padding>
-                <Insets right="20.0" top="20.0" />
-            </padding>
+        <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
+            <children>
 
-            <Label style="-fx-text-fill: #a6adc8; -fx-font-size: 12px;" text="Idioma:" />
+                <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;" text="GESTIÓN DE CINE AA1" />
 
-            <Button mnemonicParsing="false" onAction="#cambiarEspanol" style="-fx-background-color: transparent; -fx-border-color: #f5c2e7; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold;" text="ES 🇪🇸" />
-            <Button mnemonicParsing="false" onAction="#cambiarIngles" style="-fx-background-color: transparent; -fx-border-color: #89b4fa; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold;" text="EN 🇺🇸" />
-        </HBox>
+                <Label minHeight="20.0" />
 
-        <Region VBox.vgrow="ALWAYS" />
+                <Button maxWidth="Infinity" onAction="#irAPeliculas" style="-fx-background-color: #89b4fa; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="🎬 GESTIONAR PELÍCULAS">
+                    <padding>
+                        <Insets bottom="15.0" top="15.0" />
+                    </padding>
+                </Button>
 
-        <Label styleClass="titulo-principal" text="%menu.titulo">
-            <VBox.margin>
-                <Insets bottom="30.0" />
-            </VBox.margin>
-        </Label>
+                <Button maxWidth="Infinity" onAction="#irAActores" style="-fx-background-color: #a6e3a1; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="🎭 GESTIONAR ACTORES">
+                    <padding>
+                        <Insets bottom="15.0" top="15.0" />
+                    </padding>
+                </Button>
 
-        <Button mnemonicParsing="false" onAction="#irAPeliculas" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px; -fx-background-color: #89b4fa; -fx-text-fill: #1e1e2e; -fx-font-weight: 900;" text="%menu.peliculas" />
+                <Button maxWidth="Infinity" onAction="#irADashboard" style="-fx-background-color: #cba6f7; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="📊 VER ESTADÍSTICAS">
+                    <padding>
+                        <Insets bottom="15.0" top="15.0" />
+                    </padding>
+                </Button>
 
-        <Button mnemonicParsing="false" onAction="#irAArtistas" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px; -fx-background-color: #b4befe; -fx-text-fill: #1e1e2e; -fx-font-weight: 900;" text="%menu.artistas" />
+                <Label minHeight="10.0" />
 
-        <Button mnemonicParsing="false" onAction="#cerrarApp" prefHeight="70.0" prefWidth="350.0" style="-fx-font-size: 18px;" styleClass="button-peligro" text="%menu.salir" />
+                <Button maxWidth="Infinity" onAction="#salir" style="-fx-background-color: #f38ba8; -fx-text-fill: black; -fx-font-weight: bold;" text="❌ SALIR">
+                    <padding>
+                        <Insets bottom="10.0" top="10.0" />
+                    </padding>
+                </Button>
 
-        <Region VBox.vgrow="ALWAYS" />
-
+            </children>
+        </VBox>
     </children>
-</VBox>
+</AnchorPane>

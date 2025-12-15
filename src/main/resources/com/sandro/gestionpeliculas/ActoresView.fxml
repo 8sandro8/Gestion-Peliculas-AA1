@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="650.0" prefWidth="1000.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.ActoresController">
+<AnchorPane prefHeight="650.0" prefWidth="1000.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.ActoresController">
     <children>
 
         <Button onAction="#volverAlMenu" style="-fx-background-color: #45475a; -fx-text-fill: white; -fx-cursor: hand;" text="%pelis.volver" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0" />

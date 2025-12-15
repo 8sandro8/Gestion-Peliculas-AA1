@@ -1,9 +1,9 @@
-package com.sandro.gestionpeliculas;
+package com.sandro.gestionpeliculas.modelo; // Asegúrate de que el paquete es correcto
 
 import com.sandro.gestionpeliculas.dao.PeliculaDAO;
 import com.sandro.gestionpeliculas.dao.DirectorDAO;
-import com.sandro.gestionpeliculas.modelo.Pelicula;
-import com.sandro.gestionpeliculas.modelo.Director;
+// Importamos la vista del Reparto si está en el mismo paquete o ajustamos
+import com.sandro.gestionpeliculas.modelo.RepartoController;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,7 +20,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality; // IMPORTANTE PARA VENTANA EMERGENTE
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -71,7 +71,7 @@ public class PeliculasController implements Initializable {
         directorDAO = new DirectorDAO();
         listaPeliculas = FXCollections.observableArrayList();
 
-        configurarTabla();
+        configurarTabla(); // <--- AQUÍ ESTÁ EL ARREGLO
         configurarComboDirector();
         cargarDatos();
         configurarBuscador();
@@ -84,12 +84,24 @@ public class PeliculasController implements Initializable {
         });
     }
 
+    // --- ¡ESTE MÉTODO ES EL QUE ARREGLA LAS COLUMNAS VACÍAS! ---
     private void configurarTabla() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
-        colAnio.setCellValueFactory(new PropertyValueFactory<>("anio"));
-        colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
+        // Usamos Lambdas para obtener los datos DIRECTAMENTE.
+        // Esto evita errores si el nombre de la variable no coincide exactamente.
 
+        colId.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
+
+        colTitulo.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitulo()));
+
+        colAnio.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getAnio()));
+
+        colGenero.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getGenero()));
+
+        // El Director ya funcionaba bien porque usaba Lambda, lo dejamos igual
         colDirector.setCellValueFactory(cellData -> {
             Director d = cellData.getValue().getDirector();
             if (d != null) {
@@ -237,7 +249,7 @@ public class PeliculasController implements Initializable {
 
             if (seleccionada == null) {
                 peliculaGestor = new Pelicula();
-                peliculaGestor.setId(0);
+                peliculaGestor.setId(0); // ID temporal para inserción
             } else {
                 peliculaGestor = seleccionada;
             }
@@ -247,7 +259,7 @@ public class PeliculasController implements Initializable {
             peliculaGestor.setGenero(genero);
             peliculaGestor.setDirector(director);
             peliculaGestor.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
-            peliculaGestor.setRating(5.0);
+            peliculaGestor.setRating(5.0); // Valor por defecto
             peliculaGestor.setTieneOscar(false);
 
             if (archivoImagenSeleccionado != null) {
@@ -344,7 +356,8 @@ public class PeliculasController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
+            // USAMOS RUTA ABSOLUTA PARA EVITAR ERRORES
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
             loader.setResources(this.resources);
 
             Parent root = loader.load();
@@ -357,7 +370,7 @@ public class PeliculasController implements Initializable {
         }
     }
 
-    // --- NUEVO MÉTODO PARA ABRIR EL REPARTO ---
+    // --- GESTIÓN DE REPARTO ---
     @FXML
     public void gestionarReparto(ActionEvent event) {
         Pelicula seleccionada = tablaPeliculas.getSelectionModel().getSelectedItem();
@@ -367,8 +380,8 @@ public class PeliculasController implements Initializable {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("RepartoView.fxml"));
-            // (Opcional) Si quisieras pasar el idioma también: loader.setResources(this.resources);
+            // USAMOS RUTA ABSOLUTA PARA EVITAR ERRORES
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/RepartoView.fxml"));
 
             Parent root = loader.load();
 

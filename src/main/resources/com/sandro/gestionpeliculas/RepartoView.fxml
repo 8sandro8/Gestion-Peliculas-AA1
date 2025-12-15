@@ -10,14 +10,15 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.RepartoController">
+<AnchorPane prefHeight="450.0" prefWidth="750.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.RepartoController">
     <children>
-        <Label fx:id="lblTituloPelicula" layoutX="20.0" layoutY="20.0" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #89b4fa;" text="Reparto de: TITULO_PELICULA" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0" />
 
-        <HBox spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="60.0">
+        <Label fx:id="lblTituloPelicula" layoutX="20.0" layoutY="20.0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #cba6f7;" text="Reparto de: TITULO_PELICULA" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0" />
+
+        <HBox spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="70.0">
             <children>
 
-                <TableView fx:id="tablaReparto" style="-fx-background-color: #2b2d42; -fx-text-fill: white;" HBox.hgrow="ALWAYS">
+                <TableView fx:id="tablaReparto" style="-fx-background-color: transparent; -fx-border-color: #45475a;" HBox.hgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colActor" prefWidth="150.0" text="Actor" />
                         <TableColumn fx:id="colPersonaje" prefWidth="150.0" text="Personaje" />
@@ -28,22 +29,32 @@
                     </columnResizePolicy>
                 </TableView>
 
-                <VBox prefWidth="250.0" spacing="15.0" style="-fx-background-color: #2b2d42; -fx-padding: 15; -fx-background-radius: 10;">
+                <VBox prefWidth="280.0" spacing="15.0" style="-fx-background-color: #2b2d42; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 0);">
                     <children>
-                        <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Añadir Actor:" />
+                        <Label style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Añadir Nuevo:" />
 
-                        <Label style="-fx-text-fill: #a6adc8;" text="Selecciona Actor:" />
-                        <ComboBox fx:id="comboActores" prefWidth="250.0" style="-fx-background-color: #1e1e2e;" />
+                        <VBox spacing="5.0">
+                            <Label style="-fx-text-fill: #a6adc8;" text="Selecciona Actor:" />
+                            <ComboBox fx:id="comboActores" maxWidth="Infinity" style="-fx-background-color: #313244; -fx-text-fill: white;" />
+                        </VBox>
 
-                        <Label style="-fx-text-fill: #a6adc8;" text="Nombre Personaje:" />
-                        <TextField fx:id="txtPersonaje" promptText="Ej: Jack Sparrow" style="-fx-background-color: #1e1e2e; -fx-text-fill: white;" />
+                        <VBox spacing="5.0">
+                            <Label style="-fx-text-fill: #a6adc8;" text="Nombre Personaje:" />
+                            <TextField fx:id="txtPersonaje" promptText="Ej: Jack Sparrow" style="-fx-background-color: #313244; -fx-text-fill: white;" />
+                        </VBox>
 
-                        <Label style="-fx-text-fill: #a6adc8;" text="Tipo de Papel:" />
-                        <TextField fx:id="txtTipoPapel" promptText="Ej: Protagonista" style="-fx-background-color: #1e1e2e; -fx-text-fill: white;" />
+                        <VBox spacing="5.0">
+                            <Label style="-fx-text-fill: #a6adc8;" text="Tipo de Papel:" />
+                            <TextField fx:id="txtTipoPapel" promptText="Ej: Protagonista" style="-fx-background-color: #313244; -fx-text-fill: white;" />
+                        </VBox>
 
-                        <Button onAction="#agregarActor" prefWidth="250.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" text="➕ AÑADIR AL REPARTO" />
+                        <Label minHeight="10.0" />
 
-                        <Label text="" /> <Button onAction="#eliminarActor" prefWidth="250.0" style="-fx-background-color: #f38ba8; -fx-text-fill: black;" text="🗑 Quitar Seleccionado" />
+                        <Button maxWidth="Infinity" onAction="#agregarActorReparto" style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-cursor: hand;" text="➕ AÑADIR AL REPARTO" />
+
+                        <Button maxWidth="Infinity" onAction="#eliminarDeReparto" style="-fx-background-color: #f38ba8; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-cursor: hand;" text="🗑 Quitar Seleccionado" />
+
+                        <Button maxWidth="Infinity" onAction="#cerrarVentana" style="-fx-background-color: #45475a; -fx-text-fill: white; -fx-cursor: hand;" text="Cerrar Ventana" />
                     </children>
                 </VBox>
             </children>

@@ -1,123 +1,85 @@
-package com.sandro.gestionpeliculas;
+package com.sandro.gestionpeliculas.modelo; // ✅ Correcto: carpeta modelo
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable; // <--- Importante
-import javafx.scene.Node;         // <--- Importante para (Node) event.getSource()
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;              // <--- Importante
-import java.util.Locale;
+import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
-// Implementamos Initializable para poder guardar el 'resources' al iniciar
 public class MenuPrincipalController implements Initializable {
 
-    // Variable para guardar el idioma actual
     private ResourceBundle resources;
 
     @Override
-    public void initialize(URL url, ResourceBundle resources) {
-        // Capturamos el idioma que nos pasa el Splash o la pantalla anterior
-        this.resources = resources;
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        this.resources = resourceBundle;
     }
 
-    // --- MÉTODOS DE NAVEGACIÓN ---
+    @FXML
+    public void irAPeliculas(ActionEvent event) {
+        // RUTA ABSOLUTA: /com/sandro/gestionpeliculas/PeliculasView.fxml
+        cambiarPantalla(event, "/com/sandro/gestionpeliculas/PeliculasView.fxml");
+    }
 
     @FXML
-    private void irAPeliculas(ActionEvent event) {
-        try {
-            // Ahora 'this.resources' ya no es null porque lo guardamos en el initialize
-            ResourceBundle idiomaActual = this.resources;
+    public void irAActores(ActionEvent event) {
+        // RUTA ABSOLUTA: /com/sandro/gestionpeliculas/ActoresView.fxml
+        cambiarPantalla(event, "/com/sandro/gestionpeliculas/ActoresView.fxml");
+    }
 
-            // Asegúrate de que este FXML existe. Si se llama 'PeliculasView.fxml', perfecto.
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("PeliculasView.fxml"));
+    @FXML
+    public void irADashboard(ActionEvent event) {
+        // RUTA ABSOLUTA
+        cambiarPantalla(event, "/com/sandro/gestionpeliculas/DashboardView.fxml");
+    }
 
-            // Pasamos el idioma a la siguiente pantalla
-            if (idiomaActual != null) {
-                loader.setResources(idiomaActual);
-            }
+    @FXML
+    public void salir(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Salir");
+        alert.setHeaderText(null);
+        alert.setContentText("¿Seguro que quieres cerrar la aplicación?");
 
-            Parent root = loader.load();
-
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            stage.close();
         }
     }
 
-    @FXML
-    public void irAArtistas(ActionEvent actionEvent) {
-        // Redirigimos a la pantalla de Actores
-        cambiarPantalla(actionEvent, "ActoresView.fxml");
-    }
-
-    @FXML
-    public void cerrarApp(ActionEvent actionEvent) {
-        System.exit(0);
-    }
-
-    // --- MÉTODOS PARA CAMBIAR IDIOMA ---
-
-    @FXML
-    public void cambiarEspanol(ActionEvent event) {
-        System.out.println("🇪🇸 Cambiando a Español...");
-        cargarIdioma(new Locale("es"), event);
-    }
-
-    @FXML
-    public void cambiarIngles(ActionEvent event) {
-        System.out.println("🇺🇸 Changing to English...");
-        cargarIdioma(Locale.ENGLISH, event);
-    }
-
-    // Método auxiliar para recargar la escena con el nuevo idioma
-    private void cargarIdioma(Locale nuevoIdioma, ActionEvent event) {
+    private void cambiarPantalla(ActionEvent event, String fxmlFile) {
         try {
-            // 1. Cambiamos el idioma GLOBAL de la app
-            Locale.setDefault(nuevoIdioma);
+            // Usamos getClass().getResource(fxmlFile) directamente porque fxmlFile ya empieza con "/"
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
 
-            // 2. Cargamos el diccionario actualizado
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+            // Pasamos el idioma para no perderlo
+            loader.setResources(this.resources);
 
-            // 3. Recargamos la pantalla del menú
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle);
             Parent root = loader.load();
-
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("❌ Error al cambiar de idioma.");
+            System.out.println("❌ Error al cargar la pantalla: " + fxmlFile);
+            mostrarError("No se pudo cargar la pantalla:\n" + fxmlFile + "\n\nError: " + e.getMessage());
         }
     }
 
-    // Método auxiliar para no repetir código al cambiar de pantalla
-    private void cambiarPantalla(ActionEvent event, String fxml) {
-        try {
-            // Siempre cargamos el idioma actual
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-            loader.setResources(bundle);
-            Parent root = loader.load();
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void mostrarError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error de Navegación");
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }

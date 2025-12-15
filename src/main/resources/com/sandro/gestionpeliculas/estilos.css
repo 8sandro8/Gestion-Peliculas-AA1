@@ -111,27 +111,36 @@
 }
 
 /* --- 6. ARREGLO DE LISTAS Y COMBOS (ListView / ComboBox Popup) --- */
-/* Esto arregla el fondo blanco en la ventana de Reparto */
-
 .list-view {
-    -fx-background-color: #313244; /* Fondo oscuro para la caja de la lista */
+    -fx-background-color: #313244;
     -fx-border-color: #45475a;
     -fx-border-radius: 5;
 }
 
 .list-cell {
-    -fx-background-color: #313244; /* Fondo oscuro para cada elemento */
-    -fx-text-fill: white;           /* Texto blanco */
+    -fx-background-color: #313244;
+    -fx-text-fill: white;
     -fx-padding: 5 10 5 10;
 }
 
-/* Cuando pasas el ratón por encima */
 .list-cell:filled:hover {
     -fx-background-color: #45475a;
 }
 
-/* Cuando seleccionas un elemento */
 .list-cell:filled:selected {
-    -fx-background-color: #89b4fa; /* Azul */
-    -fx-text-fill: #1e1e2e;         /* Texto oscuro */
+    -fx-background-color: #89b4fa;
+    -fx-text-fill: #1e1e2e;
+}
+
+/* --- 7. ARREGLO LEYENDA GRÁFICO (Chart Legend) --- */
+/* Esto hace que el texto del PieChart se vea en blanco y quita el fondo */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+
+.chart-legend-item-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
 }
