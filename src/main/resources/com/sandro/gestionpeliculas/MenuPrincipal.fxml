@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.MenuPrincipalController">
@@ -11,23 +12,31 @@
         <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
             <children>
 
-                <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;" text="GESTIÓN DE CINE AA1" />
+                <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;" text="%menu.titulo" />
 
-                <Label minHeight="20.0" />
+                <HBox alignment="CENTER" spacing="20.0">
+                    <children>
+                        <Button onAction="#cambiarEspanol" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #a6adc8; -fx-border-color: #585b70; -fx-border-radius: 5; -fx-border-width: 2px;" text="ES" />
 
-                <Button maxWidth="Infinity" onAction="#irAPeliculas" style="-fx-background-color: #89b4fa; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="🎬 GESTIONAR PELÍCULAS">
+                        <Button onAction="#cambiarIngles" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #a6adc8; -fx-border-color: #585b70; -fx-border-radius: 5; -fx-border-width: 2px;" text="EN" />
+                    </children>
+                </HBox>
+
+                <Label minHeight="10.0" />
+
+                <Button maxWidth="Infinity" onAction="#irAPeliculas" style="-fx-background-color: #89b4fa; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="%menu.peliculas">
                     <padding>
                         <Insets bottom="15.0" top="15.0" />
                     </padding>
                 </Button>
 
-                <Button maxWidth="Infinity" onAction="#irAActores" style="-fx-background-color: #a6e3a1; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="🎭 GESTIONAR ACTORES">
+                <Button maxWidth="Infinity" onAction="#irAActores" style="-fx-background-color: #a6e3a1; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="%menu.artistas">
                     <padding>
                         <Insets bottom="15.0" top="15.0" />
                     </padding>
                 </Button>
 
-                <Button maxWidth="Infinity" onAction="#irADashboard" style="-fx-background-color: #cba6f7; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="📊 VER ESTADÍSTICAS">
+                <Button maxWidth="Infinity" onAction="#irADashboard" style="-fx-background-color: #cba6f7; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="%menu.dashboard">
                     <padding>
                         <Insets bottom="15.0" top="15.0" />
                     </padding>
@@ -35,7 +44,7 @@
 
                 <Label minHeight="10.0" />
 
-                <Button maxWidth="Infinity" onAction="#salir" style="-fx-background-color: #f38ba8; -fx-text-fill: black; -fx-font-weight: bold;" text="❌ SALIR">
+                <Button maxWidth="Infinity" onAction="#salir" style="-fx-background-color: #f38ba8; -fx-text-fill: black; -fx-font-weight: bold;" text="%menu.salir">
                     <padding>
                         <Insets bottom="10.0" top="10.0" />
                     </padding>

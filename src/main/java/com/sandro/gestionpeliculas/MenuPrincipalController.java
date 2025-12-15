@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -25,30 +26,70 @@ public class MenuPrincipalController implements Initializable {
         this.resources = resourceBundle;
     }
 
+    // --- MÉTODOS DE CAMBIO DE IDIOMA ---
+
+    @FXML
+    public void cambiarEspanol(ActionEvent event) {
+        cargarIdioma(event, new Locale("es"));
+    }
+
+    @FXML
+    public void cambiarIngles(ActionEvent event) {
+        cargarIdioma(event, new Locale("en"));
+    }
+
+    private void cargarIdioma(ActionEvent event, Locale locale) {
+        try {
+            // 1. Cargamos el fichero de propiedades con el nuevo idioma
+            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes", locale);
+
+            // 2. Cargamos de nuevo el FXML del menú
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
+            loader.setResources(bundle); // Le pasamos el nuevo idioma
+            Parent root = loader.load();
+
+            // 3. Mostramos la nueva escena
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Actualizamos la referencia local
+            this.resources = bundle;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarError("No se pudo cambiar el idioma: " + e.getMessage());
+        }
+    }
+
+    // --- NAVEGACIÓN ---
+
     @FXML
     public void irAPeliculas(ActionEvent event) {
-        // RUTA ABSOLUTA: /com/sandro/gestionpeliculas/PeliculasView.fxml
         cambiarPantalla(event, "/com/sandro/gestionpeliculas/PeliculasView.fxml");
     }
 
     @FXML
     public void irAActores(ActionEvent event) {
-        // RUTA ABSOLUTA: /com/sandro/gestionpeliculas/ActoresView.fxml
         cambiarPantalla(event, "/com/sandro/gestionpeliculas/ActoresView.fxml");
     }
 
     @FXML
     public void irADashboard(ActionEvent event) {
-        // RUTA ABSOLUTA
         cambiarPantalla(event, "/com/sandro/gestionpeliculas/DashboardView.fxml");
     }
 
     @FXML
     public void salir(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Salir");
+
+        // Usamos las claves del idioma actual para el título y el mensaje
+        String titulo = resources.containsKey("alerta.titulo.aviso") ? resources.getString("alerta.titulo.aviso") : "Salir";
+        String mensaje = resources.containsKey("menu.confirmar.salir") ? resources.getString("menu.confirmar.salir") : "¿Seguro que quieres salir?";
+
+        alert.setTitle(titulo);
         alert.setHeaderText(null);
-        alert.setContentText("¿Seguro que quieres cerrar la aplicación?");
+        alert.setContentText(mensaje);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -59,10 +100,8 @@ public class MenuPrincipalController implements Initializable {
 
     private void cambiarPantalla(ActionEvent event, String fxmlFile) {
         try {
-            // Usamos getClass().getResource(fxmlFile) directamente porque fxmlFile ya empieza con "/"
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-
-            // Pasamos el idioma para no perderlo
+            // Pasamos el idioma actual a la siguiente pantalla
             loader.setResources(this.resources);
 
             Parent root = loader.load();
@@ -78,7 +117,7 @@ public class MenuPrincipalController implements Initializable {
 
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error de Navegación");
+        alert.setTitle("Error");
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
