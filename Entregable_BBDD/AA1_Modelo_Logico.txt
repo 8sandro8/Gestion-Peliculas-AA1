@@ -1,0 +1,20 @@
+-- MODELO LÓGICO DE DATOS (Proyecto Películas)
+
+-- 1. ENTIDADES INDEPENDIENTES
+usuario [#id, nombre, email, contrasena, fecha_registro, nivel_prestigio, avatar_url, fecha_nacimiento]
+
+actor [#id, nombre, fecha_nacimiento, nacionalidad, num_premios, actividad, foto_url, debut_anio]
+
+genero [#id, nombre, descripcion, es_adultos, popularidad, fecha_creacion, publico_objetivo, color_etiqueta]
+
+director [#id, nombre, nacionalidad, num_premios, fecha_nacimiento, actividad, web_oficial, biografia]
+
+-- 2. ENTIDAD PRINCIPAL (Con enlaces 1:N)
+-- Las FK (-) apuntan al director, género y a sí misma (secuela)
+pelicula [#id, titulo, fecha_lanzamiento, duracion, presupuesto, cartel_url, sinopsis, es_mas_18, -id_director, -id_genero, -id_secuela_de]
+
+-- 3. TABLAS INTERMEDIAS (Relaciones N:M)
+-- Clave compuesta (#) formada por dos claves ajenas (-)
+actua [#-id_pelicula, #-id_actor, personaje, tipo_papel]
+
+valora [#-id_pelicula, #-id_usuario, puntuacion, comentario]
