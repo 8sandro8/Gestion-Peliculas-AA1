@@ -1,4 +1,4 @@
-package com.sandro.gestionpeliculas.modelo; // 1. IMPORTANTE: Ahora vive en 'modelo'
+package com.sandro.gestionpeliculas;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;

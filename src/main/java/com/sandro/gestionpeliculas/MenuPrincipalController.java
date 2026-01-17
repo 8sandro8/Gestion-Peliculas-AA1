@@ -1,4 +1,4 @@
-package com.sandro.gestionpeliculas.modelo; // ✅ Correcto: carpeta modelo
+package com.sandro.gestionpeliculas;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

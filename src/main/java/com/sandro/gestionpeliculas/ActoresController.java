@@ -1,6 +1,7 @@
-package com.sandro.gestionpeliculas.modelo; // ✅ Correcto: carpeta modelo
+package com.sandro.gestionpeliculas;
 
 import com.sandro.gestionpeliculas.dao.ActorDAO;
+import com.sandro.gestionpeliculas.modelo.Actor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;

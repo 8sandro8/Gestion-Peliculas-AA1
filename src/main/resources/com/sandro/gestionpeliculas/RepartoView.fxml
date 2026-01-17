@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="450.0" prefWidth="750.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.RepartoController">
+<AnchorPane prefHeight="450.0" prefWidth="750.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.RepartoController">
     <children>
 
         <Label fx:id="lblTituloPelicula" layoutX="20.0" layoutY="20.0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #cba6f7;" text="Reparto de: TITULO_PELICULA" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0" />

@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.MenuPrincipalController">
+<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.MenuPrincipalController">
     <children>
         <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
             <children>

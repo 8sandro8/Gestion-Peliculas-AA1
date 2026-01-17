@@ -5,7 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="350.0" prefWidth="600.0" style="-fx-background-color: #1e1e2e;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.SplashController">
+<AnchorPane prefHeight="350.0" prefWidth="600.0" style="-fx-background-color: #1e1e2e;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.SplashController">
     <children>
         <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>

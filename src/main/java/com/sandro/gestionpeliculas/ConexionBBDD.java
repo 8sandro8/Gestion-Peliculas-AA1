@@ -9,7 +9,7 @@ public class ConexionBBDD {
     // DATOS DE MARIADB
     private static final String URL = "jdbc:mariadb://localhost:3306/aa1";
     private static final String USER = "root";
-    private static final String PASSWORD = "Sandro.89";
+    private static final String PASSWORD = "";
 
     public static Connection conectar() {
         Connection con = null;

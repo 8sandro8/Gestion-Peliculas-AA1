@@ -1,4 +1,4 @@
-package com.sandro.gestionpeliculas.modelo; // 1. OJO: Ahora está en el paquete 'modelo'
+package com.sandro.gestionpeliculas;
 
 import com.sandro.gestionpeliculas.dao.EstadisticasDAO;
 import javafx.collections.FXCollections;

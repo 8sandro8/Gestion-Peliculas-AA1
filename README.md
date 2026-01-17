@@ -81,7 +81,7 @@ La lógica de datos se apoya en un diseño relacional complejo y optimizado.
     ```
 2.  **Base de Datos:**
     * Importar el script `AA1_Backup_Completo.sql` (ubicado en `Entregable_BBDD`) en tu servidor MariaDB.
-    * Configurar la conexión en el archivo `ConexionBBDD.java` (o `db.properties`).
+    * Configurar la conexión en el archivo `ConexionBBDD.java`.
 3.  **Ejecutar:**
     * Abrir el proyecto en IntelliJ IDEA.
     * Sincronizar dependencias Maven.

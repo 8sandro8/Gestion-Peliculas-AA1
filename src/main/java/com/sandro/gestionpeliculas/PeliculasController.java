@@ -1,8 +1,9 @@
-package com.sandro.gestionpeliculas.modelo; // Asegúrate de que el paquete es correcto
+package com.sandro.gestionpeliculas;
 
-import com.sandro.gestionpeliculas.RepartoController;
 import com.sandro.gestionpeliculas.dao.DirectorDAO;
 import com.sandro.gestionpeliculas.dao.PeliculaDAO;
+import com.sandro.gestionpeliculas.modelo.Director;
+import com.sandro.gestionpeliculas.modelo.Pelicula;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;

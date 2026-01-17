@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.modelo.PeliculasController">
+<AnchorPane prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.PeliculasController">
     <children>
 
         <Button onAction="#volverAlMenu" style="-fx-background-color: #45475a; -fx-text-fill: white; -fx-cursor: hand;" text="%pelis.volver" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0" />
