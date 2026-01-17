@@ -1,6 +1,3 @@
--- SCRIPT SQL PARA CREAR LA BASE DE DATOS 'PROYECTO_PELICULAS'
--- Basado en el diseño aprobado y el estilo de la wiki bbdd.codeandcoke.com
-
 -- 1. CREACIÓN DE TABLAS INDEPENDIENTES
 -- Primero creamos las que no dependen de nadie para evitar errores.
 
@@ -34,7 +31,7 @@ CREATE TABLE genero (
     popularidad INT DEFAULT 0,
     fecha_creacion DATE,
     publico_objetivo VARCHAR(100),
-    color_etiqueta VARCHAR(20) -- Ejemplo: '#FF0000'
+    color_etiqueta VARCHAR(20)
 );
 
 CREATE TABLE director (
@@ -49,7 +46,6 @@ CREATE TABLE director (
 );
 
 -- 2. CREACIÓN DE LA TABLA PRINCIPAL (PELICULA)
--- Aquí añadimos las claves foráneas (FK) hacia Director y Género.
 
 CREATE TABLE pelicula (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -63,8 +59,7 @@ CREATE TABLE pelicula (
     id_director INT,
     id_genero INT,
     id_secuela_de INT, -- Relación Reflexiva
-    
-    -- Definición de las Relaciones (Foreign Keys)
+
     CONSTRAINT fk_pelicula_director FOREIGN KEY (id_director) REFERENCES director(id),
     CONSTRAINT fk_pelicula_genero FOREIGN KEY (id_genero) REFERENCES genero(id),
     CONSTRAINT fk_pelicula_secuela FOREIGN KEY (id_secuela_de) REFERENCES pelicula(id)
@@ -79,7 +74,7 @@ CREATE TABLE actua (
     personaje VARCHAR(100),
     tipo_papel VARCHAR(50), -- 'Protagonista', 'Secundario'...
     
-    PRIMARY KEY (id_pelicula, id_actor), -- Clave compuesta
+    PRIMARY KEY (id_pelicula, id_actor),
     CONSTRAINT fk_actua_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula(id),
     CONSTRAINT fk_actua_actor FOREIGN KEY (id_actor) REFERENCES actor(id)
 );
@@ -88,10 +83,10 @@ CREATE TABLE actua (
 CREATE TABLE valora (
     id_pelicula INT,
     id_usuario INT,
-    puntuacion INT CHECK (puntuacion BETWEEN 0 AND 10), -- Restricción simple (0-10)
+    puntuacion INT CHECK (puntuacion BETWEEN 0 AND 10),
     comentario TEXT,
     
-    PRIMARY KEY (id_pelicula, id_usuario), -- Clave compuesta
+    PRIMARY KEY (id_pelicula, id_usuario),
     CONSTRAINT fk_valora_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula(id),
     CONSTRAINT fk_valora_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );

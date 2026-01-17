@@ -1,5 +1,3 @@
--- Incluye: Funciones de Fecha, Outer Joins y Uniones.
-
 -- EXTRA 3: FUNCIONES DE FECHA (5 CONSULTAS)
 -- Requisito: Usar funciones variadas de tratamiento de fechas.
 
@@ -13,7 +11,6 @@ FROM pelicula
 WHERE MONTH(fecha_lanzamiento) IN (6, 7, 8);
 
 -- 3. DATE_FORMAT: Mostrar la fecha en formato español (DD/MM/YYYY)
--- Muy útil para la interfaz de usuario final.
 SELECT titulo, DATE_FORMAT(fecha_lanzamiento, '%d/%m/%Y') AS "Fecha Formateada"
 FROM pelicula;
 
@@ -28,7 +25,6 @@ FROM pelicula;
 
 -- -----------------------------------------------------------------------------
 -- EXTRA 4: OUTER JOINS (LEFT / RIGHT) (5 CONSULTAS)
--- Requisito: Mostrar datos aunque no tengan relación (NULLs).
 -- -----------------------------------------------------------------------------
 
 -- 6. LEFT JOIN: Mostrar TODOS los directores, incluso los que no han dirigido ninguna peli
@@ -63,10 +59,8 @@ FROM pelicula p
 WHERE p.id_secuela_de IS NULL;
 
 
--- -----------------------------------------------------------------------------
 -- EXTRA 5: UNIONES (UNION) (5 CONSULTAS)
 -- Requisito: Combinar resultados de varias tablas en una sola lista.
--- -----------------------------------------------------------------------------
 
 -- 11. Lista VIP: Nombres de Directores y Actores en una sola lista
 SELECT nombre, 'Director' AS "Rol" FROM director

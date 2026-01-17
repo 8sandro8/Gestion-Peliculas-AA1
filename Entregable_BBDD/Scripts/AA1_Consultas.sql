@@ -1,6 +1,3 @@
--- Script de consultas para la AA1
--- Proyecto: Gestión de Películas
-
 -- Para las dos consultas extras
 -- "Dame todas las pelis de Ciencia Ficción" (sin hacer joins manuales)
 SELECT titulo, director, duracion

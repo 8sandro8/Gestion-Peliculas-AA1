@@ -77,14 +77,14 @@ INSERT INTO actua (id_pelicula, id_actor, personaje, tipo_papel) VALUES
 (4, 6, 'Barbie', 'Protagonista'), -- Barbie - Margot Robbie
 (6, 5, 'Cobb', 'Protagonista'),   -- Inception - DiCaprio
 (6, 9, 'Robert Fischer', 'Secundario'), -- Inception - Cillian
-(5, 10, 'Cliff Booth', 'Protagonista'); -- Pulp Fiction (Invento para test) - Brad Pitt
+(5, 10, 'Cliff Booth', 'Protagonista'); -- Pulp Fiction - Brad Pitt
 
 -- 7. INSERTAR VALORA (Opiniones) (Varios registros)
 INSERT INTO valora (id_pelicula, id_usuario, puntuacion, comentario) VALUES 
-(1, 1, 9, 'Una obra maestra visual.'), -- Santi vota Dune
+(1, 1, 9, 'Una obra maestra visual.'),
 (1, 2, 10, 'Increíble adaptación.'),
 (2, 3, 10, 'Un clásico absoluto.'),
-(4, 4, 2, 'Demasiado rosa para mí.'), -- Hater vota Barbie
+(4, 4, 2, 'Demasiado rosa para mí.'),
 (4, 5, 8, 'Muy divertida y crítica.'),
 (3, 1, 9, 'Nolan lo ha vuelto a hacer.'),
 (8, 2, 10, 'Mejor que la primera parte.'),
