@@ -1,10 +1,8 @@
 package com.sandro.gestionpeliculas.modelo; // Asegúrate de que el paquete es correcto
 
-import com.sandro.gestionpeliculas.dao.PeliculaDAO;
+import com.sandro.gestionpeliculas.RepartoController;
 import com.sandro.gestionpeliculas.dao.DirectorDAO;
-// Importamos la vista del Reparto si está en el mismo paquete o ajustamos
-import com.sandro.gestionpeliculas.modelo.RepartoController;
-
+import com.sandro.gestionpeliculas.dao.PeliculaDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,7 +14,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -24,8 +21,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.io.File;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
@@ -34,8 +31,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.ResourceBundle;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class PeliculasController implements Initializable {
 

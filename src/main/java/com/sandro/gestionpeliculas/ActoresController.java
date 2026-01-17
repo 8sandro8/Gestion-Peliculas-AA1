@@ -16,17 +16,17 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter; // Añadido
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;     // Añadido
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ResourceBundle;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class ActoresController implements Initializable {
 

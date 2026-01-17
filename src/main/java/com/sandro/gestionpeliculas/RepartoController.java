@@ -1,11 +1,10 @@
-package com.sandro.gestionpeliculas.modelo;
+package com.sandro.gestionpeliculas;
 
-import com.sandro.gestionpeliculas.dao.RepartoDAO;
 import com.sandro.gestionpeliculas.dao.ActorDAO;
-import com.sandro.gestionpeliculas.modelo.Pelicula;
+import com.sandro.gestionpeliculas.dao.RepartoDAO;
 import com.sandro.gestionpeliculas.modelo.Actor;
 import com.sandro.gestionpeliculas.modelo.Actuacion;
-
+import com.sandro.gestionpeliculas.modelo.Pelicula;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

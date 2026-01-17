@@ -2,7 +2,7 @@ package com.sandro.gestionpeliculas.dao;
 
 import com.sandro.gestionpeliculas.ConexionBBDD;
 import com.sandro.gestionpeliculas.modelo.Actor;
-import com.sandro.gestionpeliculas.modelo.Actuacion; // Importante para la lista
+import com.sandro.gestionpeliculas.modelo.Actuacion;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
