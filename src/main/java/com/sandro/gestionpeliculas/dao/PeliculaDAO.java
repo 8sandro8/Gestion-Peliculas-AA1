@@ -11,13 +11,11 @@ import java.util.List;
 
 public class PeliculaDAO {
 
-    // Necesitamos el DAO de directores para "traducir" el ID numérico al objeto Director
     private DirectorDAO directorDAO = new DirectorDAO();
 
-    // --- MÉTODO 1: LISTAR TODAS (El más importante ahora) ---
+    // --- METODO 1: LISTAR TODAS  ---
     public List<Pelicula> listarTodas() {
         List<Pelicula> lista = new ArrayList<>();
-        // Asegúrate de que tu tabla se llama 'pelicula' (singular) o 'peliculas' (plural)
         String sql = "SELECT * FROM pelicula";
 
         Connection con = ConexionBBDD.conectar();
@@ -36,7 +34,6 @@ public class PeliculaDAO {
                 try {
                     Pelicula p = new Pelicula();
 
-                    // Asignación de datos básicos
                     p.setId(rs.getInt("id"));
                     p.setTitulo(rs.getString("titulo"));
                     p.setDuracion(rs.getInt("duracion"));
@@ -46,18 +43,14 @@ public class PeliculaDAO {
                     p.setIdGenero(rs.getInt("id_genero"));
 
                     // --- FECHA ---
-                    // IMPORTANTE: Si en tu base de datos la columna se llama "anio" (int), cambia esta línea.
-                    // Aquí asumimos que es tipo DATE y se llama "fecha_lanzamiento".
                     try {
                         Date fechaSql = rs.getDate("fecha_lanzamiento");
                         if (fechaSql != null) {
                             p.setFechaLanzamiento(fechaSql.toLocalDate());
                         } else {
-                            // Si es nula, ponemos fecha actual para que no falle
                             p.setFechaLanzamiento(LocalDate.now());
                         }
                     } catch (SQLException e) {
-                        // Si falla porque la columna no existe, intentamos leer 'anio'
                         try {
                             int anio = rs.getInt("anio");
                             p.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
@@ -71,7 +64,6 @@ public class PeliculaDAO {
                     int idDirector = rs.getInt("id_director");
                     p.setIdDirector(idDirector);
 
-                    // Recuperamos el objeto Director completo para que salga el nombre en la tabla
                     if (idDirector > 0) {
                         Director d = directorDAO.obtenerPorId(idDirector);
                         p.setDirector(d);
@@ -166,8 +158,6 @@ public class PeliculaDAO {
     // --- MÉTODO 4: ELIMINAR ---
     public boolean eliminar(int id) {
         String sqlBorrarPeli = "DELETE FROM pelicula WHERE id = ?";
-        // Opcional: Borrar tablas relacionadas antes si hay FK (actua, valora, etc)
-        // Por simplicidad, intentamos borrar directo:
 
         Connection con = ConexionBBDD.conectar();
         if (con == null) return false;

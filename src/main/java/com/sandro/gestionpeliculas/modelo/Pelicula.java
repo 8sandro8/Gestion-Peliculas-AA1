@@ -70,7 +70,6 @@ public class Pelicula {
     public int getIdGenero() { return idGenero; }
     public void setIdGenero(int idGenero) { this.idGenero = idGenero; }
 
-    // MÉTODO CALCULADO: AÑO
     public int getAnio() {
         if (fechaLanzamiento != null) return fechaLanzamiento.getYear();
         return 0;

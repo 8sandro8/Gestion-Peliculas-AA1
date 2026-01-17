@@ -20,7 +20,6 @@ public class EstadisticasDAO {
         return contar("SELECT COUNT(*) FROM actor");
     }
 
-    // Método auxiliar privado
     private int contar(String sql) {
         int total = 0;
         try (Connection con = ConexionBBDD.conectar();
@@ -36,13 +35,9 @@ public class EstadisticasDAO {
         return total;
     }
 
-    // 3. Obtener datos para el Gráfico (CORREGIDO CON JOIN)
     public Map<String, Integer> contarPeliculasPorGenero() {
         Map<String, Integer> datos = new HashMap<>();
 
-        // --- AQUÍ ESTÁ EL CAMBIO ---
-        // Hacemos JOIN con la tabla 'genero' para sacar el nombre real.
-        // Asumimos que la tabla se llama 'genero' y la columna del texto 'nombre'
         String sql = "SELECT g.nombre, COUNT(*) as cantidad " +
                 "FROM pelicula p " +
                 "JOIN genero g ON p.id_genero = g.id " +

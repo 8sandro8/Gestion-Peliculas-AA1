@@ -35,14 +35,12 @@ public class DashboardController implements Initializable {
     }
 
     private void cargarDatos() {
-        // 1. Cargar números grandes
         int totalPelis = estadisticasDAO.contarPeliculas();
         int totalActores = estadisticasDAO.contarActores();
 
         lblTotalPelis.setText(String.valueOf(totalPelis));
         lblTotalActores.setText(String.valueOf(totalActores));
 
-        // 2. Cargar Gráfico de Quesitos (PieChart)
         Map<String, Integer> datosGeneros = estadisticasDAO.contarPeliculasPorGenero();
 
         ObservableList<PieChart.Data> datosGrafico = FXCollections.observableArrayList();
@@ -51,7 +49,6 @@ public class DashboardController implements Initializable {
             String nombreGenero = entry.getKey();
             Integer cantidad = entry.getValue();
 
-            // Añadimos el dato: "Terror (5)"
             datosGrafico.add(new PieChart.Data(nombreGenero + " (" + cantidad + ")", cantidad));
         }
 
@@ -62,10 +59,8 @@ public class DashboardController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            // 2. OJO: Usamos la ruta absoluta "/" para ir a buscar el FXML a la raíz de resources
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
 
-            // Pasamos los recursos para no perder el idioma seleccionado
             loader.setResources(this.resources);
 
             Parent root = loader.load();

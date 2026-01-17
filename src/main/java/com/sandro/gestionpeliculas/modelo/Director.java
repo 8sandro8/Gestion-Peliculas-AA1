@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 public class Director {
 
-    // --- ATRIBUTOS (Los 5 que tu código está buscando) ---
     private int id;
     private String nombre;
     private LocalDate fechaNacimiento;
@@ -16,13 +15,11 @@ public class Director {
     }
 
     // --- CONSTRUCTOR 2: COMPLETO (ID + Nombre) ---
-    // (Por si acaso alguna parte usa solo estos dos)
     public Director(int id, String nombre) {
         this.id = id;
         this.nombre = nombre;
     }
 
-    // --- CONSTRUCTOR 3: EL QUE ESTÁ FALLANDO AHORA (5 Argumentos) ---
     public Director(int id, String nombre, LocalDate fechaNacimiento, String webOficial, String nacionalidad) {
         this.id = id;
         this.nombre = nombre;
@@ -31,7 +28,6 @@ public class Director {
         this.nacionalidad = nacionalidad;
     }
 
-    // --- GETTERS Y SETTERS (¡Ahora sí tienen código dentro!) ---
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -48,7 +44,6 @@ public class Director {
     public String getNacionalidad() { return nacionalidad; }
     public void setNacionalidad(String nacionalidad) { this.nacionalidad = nacionalidad; }
 
-    // --- TO STRING (Para el ComboBox) ---
     @Override
     public String toString() {
         return nombre;

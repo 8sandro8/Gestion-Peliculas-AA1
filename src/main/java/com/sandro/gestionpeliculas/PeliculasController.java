@@ -39,7 +39,6 @@ import java.util.Optional;
 
 public class PeliculasController implements Initializable {
 
-    // --- ELEMENTOS DE LA VISTA (FXML) ---
     @FXML private TableView<Pelicula> tablaPeliculas;
     @FXML private TableColumn<Pelicula, Integer> colId;
     @FXML private TableColumn<Pelicula, String> colTitulo;
@@ -55,14 +54,12 @@ public class PeliculasController implements Initializable {
     @FXML private ComboBox<Director> comboDirector;
     @FXML private ImageView imgPoster;
 
-    // --- VARIABLES DE DATOS ---
     private ObservableList<Pelicula> listaPeliculas;
     private PeliculaDAO peliculaDAO;
     private DirectorDAO directorDAO;
     private File archivoImagenSeleccionado;
     private ResourceBundle resources;
 
-    // --- INICIALIZACIÓN ---
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resources = resourceBundle;
@@ -71,12 +68,11 @@ public class PeliculasController implements Initializable {
         directorDAO = new DirectorDAO();
         listaPeliculas = FXCollections.observableArrayList();
 
-        configurarTabla(); // <--- AQUÍ ESTÁ EL ARREGLO
+        configurarTabla();
         configurarComboDirector();
         cargarDatos();
         configurarBuscador();
 
-        // Listener: Al hacer clic en la tabla, rellenar el formulario
         tablaPeliculas.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 mostrarDetalles(newSelection);
@@ -84,10 +80,7 @@ public class PeliculasController implements Initializable {
         });
     }
 
-    // --- ¡ESTE MÉTODO ES EL QUE ARREGLA LAS COLUMNAS VACÍAS! ---
     private void configurarTabla() {
-        // Usamos Lambdas para obtener los datos DIRECTAMENTE.
-        // Esto evita errores si el nombre de la variable no coincide exactamente.
 
         colId.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
@@ -101,7 +94,6 @@ public class PeliculasController implements Initializable {
         colGenero.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getGenero()));
 
-        // El Director ya funcionaba bien porque usaba Lambda, lo dejamos igual
         colDirector.setCellValueFactory(cellData -> {
             Director d = cellData.getValue().getDirector();
             if (d != null) {
@@ -151,7 +143,6 @@ public class PeliculasController implements Initializable {
         tablaPeliculas.setItems(filtro);
     }
 
-    // --- MÉTODOS DEL FORMULARIO ---
 
     @FXML
     public void limpiarFormulario() {

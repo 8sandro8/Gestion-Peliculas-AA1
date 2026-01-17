@@ -27,7 +27,6 @@ import java.util.ResourceBundle;
 
 public class DirectoresController implements Initializable {
 
-    // --- ELEMENTOS FXML ---
     @FXML private TextField txtBuscar;
     @FXML private TableView<Director> tablaDirectores;
     @FXML private TableColumn<Director, Integer> colId;
@@ -39,21 +38,18 @@ public class DirectoresController implements Initializable {
     @FXML private TextField txtNacionalidad;
     @FXML private TextField txtWeb;
 
-    // --- VARIABLES ---
     private DirectorDAO directorDAO = new DirectorDAO();
     private Director directorSeleccionado = null;
     private ObservableList<Director> listaMaster = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Configurar columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colNacionalidad.setCellValueFactory(new PropertyValueFactory<>("nacionalidad"));
 
         cargarDirectores();
 
-        // Listener de selección
         tablaDirectores.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 directorSeleccionado = newSel;
@@ -61,13 +57,11 @@ public class DirectoresController implements Initializable {
             }
         });
 
-        // Listener del buscador
         txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrarDirectores(newVal));
     }
 
     private void cargarDirectores() {
         tablaDirectores.getItems().clear();
-        // Usamos obtenerTodos() que ya arreglamos ayer en el DAO
         List<Director> lista = directorDAO.obtenerTodos();
         listaMaster = FXCollections.observableArrayList(lista);
         tablaDirectores.setItems(listaMaster);
@@ -108,7 +102,6 @@ public class DirectoresController implements Initializable {
 
         if (directorSeleccionado == null) {
             // CREAR
-            // Usamos el constructor completo que arreglamos ayer
             Director nuevo = new Director(0, nombre, fecha, web, nacionalidad);
             if (directorDAO.insertar(nuevo)) {
                 mostrarAlerta("Éxito", "Director guardado correctamente");

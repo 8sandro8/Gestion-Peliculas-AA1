@@ -1,4 +1,3 @@
-# Archivos compilados y de IDE
 target/
 out/
 .idea/
@@ -9,5 +8,4 @@ out/
 .DS_Store
 Thumbs.db
 
-# Logs
 *.log

@@ -6,12 +6,11 @@ import java.sql.SQLException;
 
 public class ConexionBBDD {
 
-    // DATOS DE TU MARIADB
+    // DATOS DE MARIADB
     private static final String URL = "jdbc:mariadb://localhost:3306/aa1";
     private static final String USER = "root";
     private static final String PASSWORD = "Sandro.89";
 
-    // HE CAMBIADO EL NOMBRE A 'conectar' PARA QUE TUS DAOs FUNCIONEN
     public static Connection conectar() {
         Connection con = null;
         try {

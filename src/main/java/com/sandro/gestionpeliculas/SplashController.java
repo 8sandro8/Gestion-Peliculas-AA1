@@ -22,7 +22,6 @@ public class SplashController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Hilo secundario para simular carga
         new Thread(() -> {
             try {
                 actualizarBarra(0.1, "Cargando configuración...");
@@ -40,7 +39,6 @@ public class SplashController implements Initializable {
                 actualizarBarra(1.0, "¡Listo!");
                 Thread.sleep(300);
 
-                // Volvemos al hilo de JavaFX para abrir la ventana
                 Platform.runLater(this::abrirMenuPrincipal);
 
             } catch (InterruptedException e) {
@@ -58,14 +56,10 @@ public class SplashController implements Initializable {
 
     private void abrirMenuPrincipal() {
         try {
-            // 2. INTENTO DE CARGAR IDIOMA
-            // Nota: Si tu archivo se llama "textos_es.properties", pon "textos" aquí.
-            // Si se llama "mensajes_es.properties", deja "mensajes".
             ResourceBundle bundle = null;
             try {
                 bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
             } catch (MissingResourceException e) {
-                // Si falla, intentamos con 'textos' que vi en tus capturas
                 try {
                     bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.textos");
                 } catch (MissingResourceException e2) {
@@ -73,7 +67,6 @@ public class SplashController implements Initializable {
                 }
             }
 
-            // 3. CORRECCIÓN CLAVE: USAR RUTA ABSOLUTA CON "/"
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
 
             if (bundle != null) {
@@ -82,13 +75,11 @@ public class SplashController implements Initializable {
 
             Parent root = loader.load();
 
-            // Crear la nueva ventana
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
-            stage.setTitle("Gestión de Cine AA1"); // Título de la ventana
+            stage.setTitle("Gestión de Cine AA1");
             stage.show();
 
-            // Cerrar la ventana del Splash (usamos getScene().getWindow() para asegurarnos)
             if (lblEstado.getScene() != null) {
                 Stage myStage = (Stage) lblEstado.getScene().getWindow();
                 myStage.close();

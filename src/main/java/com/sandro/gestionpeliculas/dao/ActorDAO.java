@@ -10,7 +10,6 @@ import java.util.List;
 
 public class ActorDAO {
 
-    // --- 1. LEER TODOS ---
     public List<Actor> obtenerTodos() {
         List<Actor> lista = new ArrayList<>();
         String sql = "SELECT * FROM actor";
@@ -34,7 +33,6 @@ public class ActorDAO {
                 a.setFechaNacimiento(fecha);
                 a.setNacionalidad(rs.getString("nacionalidad"));
 
-                // --- NUEVO: LEER FOTO ---
                 a.setFotoUrl(rs.getString("foto_url"));
 
                 lista.add(a);
@@ -66,7 +64,7 @@ public class ActorDAO {
             st.setString(1, a.getNombre());
             st.setDate(2, (a.getFechaNacimiento() != null) ? Date.valueOf(a.getFechaNacimiento()) : null);
             st.setString(3, a.getNacionalidad());
-            st.setString(4, a.getFotoUrl()); // <--- NUEVO
+            st.setString(4, a.getFotoUrl());
 
             int filas = st.executeUpdate();
             st.close();
@@ -92,8 +90,8 @@ public class ActorDAO {
             st.setString(1, a.getNombre());
             st.setDate(2, (a.getFechaNacimiento() != null) ? Date.valueOf(a.getFechaNacimiento()) : null);
             st.setString(3, a.getNacionalidad());
-            st.setString(4, a.getFotoUrl()); // <--- NUEVO
-            st.setInt(5, a.getId());         // El ID pasa a ser el 5º parámetro
+            st.setString(4, a.getFotoUrl());
+            st.setInt(5, a.getId());
 
             int filas = st.executeUpdate();
             st.close();

@@ -13,9 +13,6 @@ import java.util.List;
 
 public class RepartoDAO {
 
-    /**
-     * Obtiene la lista de actuaciones (Actores + Personaje) de una película.
-     */
     public List<Actuacion> obtenerReparto(int idPelicula) {
         List<Actuacion> lista = new ArrayList<>();
 
@@ -53,10 +50,6 @@ public class RepartoDAO {
         return lista;
     }
 
-    /**
-     * ESTE ES EL MÉTODO QUE TE FALTABA.
-     * Inserta una nueva relación en la tabla 'actua'.
-     */
     public boolean agregarReparto(int idPelicula, int idActor, String personaje) {
         String sql = "INSERT INTO actua (id_pelicula, id_actor, personaje) VALUES (?, ?, ?)";
 
@@ -76,9 +69,6 @@ public class RepartoDAO {
         }
     }
 
-    /**
-     * Método opcional para eliminar (por si lo implementas en el futuro)
-     */
     public boolean eliminarReparto(int idPelicula, int idActor) {
         String sql = "DELETE FROM actua WHERE id_pelicula = ? AND id_actor = ?";
 

@@ -30,7 +30,6 @@ import java.util.Optional;
 
 public class ActoresController implements Initializable {
 
-    // --- ELEMENTOS FXML ---
     @FXML private TableView<Actor> tablaActores;
     @FXML private TableColumn<Actor, Integer> colId;
     @FXML private TableColumn<Actor, String> colNombre;
@@ -177,7 +176,6 @@ public class ActoresController implements Initializable {
         }
     }
 
-    // --- ¡ESTE MÉTODO FALTABA Y ES CRUCIAL PORQUE EL FXML LO LLAMA! ---
     @FXML
     public void exportarCSV() {
         FileChooser fileChooser = new FileChooser();

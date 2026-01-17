@@ -1,5 +1,3 @@
-/* --- ESTILOS.CSS - VERSIÓN FINAL DEFINITIVA --- */
-
 /* 1. FONDO GENERAL */
 .root {
     -fx-background-color: #1e1e2e;
@@ -110,7 +108,6 @@
     -fx-border-width: 2px;
 }
 
-/* --- 6. ARREGLO DE LISTAS Y COMBOS (ListView / ComboBox Popup) --- */
 .list-view {
     -fx-background-color: #313244;
     -fx-border-color: #45475a;
@@ -132,8 +129,6 @@
     -fx-text-fill: #1e1e2e;
 }
 
-/* --- 7. ARREGLO LEYENDA GRÁFICO (Chart Legend) --- */
-/* Esto hace que el texto del PieChart se vea en blanco y quita el fondo */
 .chart-legend {
     -fx-background-color: transparent;
     -fx-padding: 10px;

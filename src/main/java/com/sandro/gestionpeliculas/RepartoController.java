@@ -4,7 +4,7 @@ import com.sandro.gestionpeliculas.dao.RepartoDAO;
 import com.sandro.gestionpeliculas.dao.ActorDAO;
 import com.sandro.gestionpeliculas.modelo.Pelicula;
 import com.sandro.gestionpeliculas.modelo.Actor;
-import com.sandro.gestionpeliculas.modelo.Actuacion; // <--- IMPORTANTE: Importamos la clase Actuacion
+import com.sandro.gestionpeliculas.modelo.Actuacion;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -22,7 +22,6 @@ import java.util.ResourceBundle;
 
 public class RepartoController implements Initializable {
 
-    // --- ELEMENTOS FXML ---
     @FXML private Label lblTituloPelicula;
 
     @FXML private TableView<FilaReparto> tablaReparto;
@@ -73,19 +72,13 @@ public class RepartoController implements Initializable {
         }
     }
 
-    // --- AQUÍ ESTÁ LA CORRECCIÓN DEL ERROR ---
     private void cargarReparto() {
         if (peliculaActual != null) {
             datosReparto.clear();
 
-            // 1. Recibimos la lista de OBJETOS Actuacion (no Strings)
             List<Actuacion> listaActuaciones = repartoDAO.obtenerReparto(peliculaActual.getId());
 
-            // 2. Recorremos los objetos y sacamos los datos
             for (Actuacion actuacion : listaActuaciones) {
-
-                // NOTA: Asumo que tu clase Actuacion tiene .getActor() que devuelve un Actor
-                // y .getPersonaje() que devuelve un String.
 
                 String nombreActor = "Desconocido";
                 if (actuacion.getActor() != null) {
@@ -94,8 +87,6 @@ public class RepartoController implements Initializable {
 
                 String personaje = actuacion.getPersonaje();
 
-                // Si tu clase Actuacion tiene getPapel() o getRol(), úsalo aquí.
-                // Si no, lo dejamos como "N/A"
                 String rol = "N/A";
 
                 datosReparto.add(new FilaReparto(nombreActor, personaje, rol));
@@ -149,7 +140,6 @@ public class RepartoController implements Initializable {
         alert.showAndWait();
     }
 
-    // --- CLASE INTERNA PARA LA TABLA ---
     public static class FilaReparto {
         private final String actor;
         private final String personaje;

@@ -40,20 +40,16 @@ public class MenuPrincipalController implements Initializable {
 
     private void cargarIdioma(ActionEvent event, Locale locale) {
         try {
-            // 1. Cargamos el fichero de propiedades con el nuevo idioma
             ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes", locale);
 
-            // 2. Cargamos de nuevo el FXML del menú
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
             loader.setResources(bundle); // Le pasamos el nuevo idioma
             Parent root = loader.load();
 
-            // 3. Mostramos la nueva escena
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
 
-            // Actualizamos la referencia local
             this.resources = bundle;
 
         } catch (IOException e) {
@@ -83,7 +79,6 @@ public class MenuPrincipalController implements Initializable {
     public void salir(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 
-        // Usamos las claves del idioma actual para el título y el mensaje
         String titulo = resources.containsKey("alerta.titulo.aviso") ? resources.getString("alerta.titulo.aviso") : "Salir";
         String mensaje = resources.containsKey("menu.confirmar.salir") ? resources.getString("menu.confirmar.salir") : "¿Seguro que quieres salir?";
 
@@ -101,7 +96,6 @@ public class MenuPrincipalController implements Initializable {
     private void cambiarPantalla(ActionEvent event, String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
-            // Pasamos el idioma actual a la siguiente pantalla
             loader.setResources(this.resources);
 
             Parent root = loader.load();

@@ -9,9 +9,7 @@ import java.util.List;
 
 public class DirectorDAO {
 
-    // --- MÉTODOS DE LECTURA ---
 
-    // 1. LISTAR TODOS (Con todos los campos: nombre, nacionalidad, web, fecha)
     public List<Director> listarTodos() {
         List<Director> lista = new ArrayList<>();
         String sql = "SELECT * FROM director";
@@ -47,7 +45,6 @@ public class DirectorDAO {
         return lista;
     }
 
-    // 2. OBTRNER TODOS (Alias para compatibilidad)
     public List<Director> obtenerTodos() {
         return listarTodos();
     }
@@ -86,7 +83,6 @@ public class DirectorDAO {
         return d;
     }
 
-    // --- INSERTAR (Completo con todos los campos) ---
     public boolean insertar(Director d) {
         String sql = "INSERT INTO director (nombre, fecha_nacimiento, nacionalidad, web_oficial) VALUES (?, ?, ?, ?)";
         Connection con = ConexionBBDD.conectar();
@@ -115,7 +111,6 @@ public class DirectorDAO {
         }
     }
 
-    // --- ACTUALIZAR (Completo con todos los campos) ---
     public boolean actualizar(Director d) {
         String sql = "UPDATE director SET nombre=?, fecha_nacimiento=?, nacionalidad=?, web_oficial=? WHERE id=?";
         Connection con = ConexionBBDD.conectar();
