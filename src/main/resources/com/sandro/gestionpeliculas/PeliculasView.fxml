@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+
 <AnchorPane prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.PeliculasController">
     <children>
 
@@ -67,7 +68,7 @@
                                 <TextField fx:id="txtDuracion" promptText="Minutos" style="-fx-background-color: #1e1e2e; -fx-text-fill: white; -fx-border-color: #585b70; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                                 <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="%pelis.form.genero" GridPane.rowIndex="3" />
-                                <TextField fx:id="txtGenero" style="-fx-background-color: #1e1e2e; -fx-text-fill: white; -fx-border-color: #585b70; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <ComboBox fx:id="comboGenero" prefWidth="200.0" style="-fx-background-color: #1e1e2e; -fx-text-fill: white; -fx-border-color: #585b70; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                                 <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="%pelis.form.director" GridPane.rowIndex="4" />
                                 <ComboBox fx:id="comboDirector" prefWidth="200.0" style="-fx-background-color: #1e1e2e; -fx-text-fill: white; -fx-border-color: #585b70; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.rowIndex="4" />

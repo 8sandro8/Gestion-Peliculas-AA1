@@ -21,7 +21,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -32,6 +31,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -48,7 +49,7 @@ public class PeliculasController implements Initializable {
     @FXML private TextField txtTitulo;
     @FXML private TextField txtAnio;
     @FXML private TextField txtDuracion;
-    @FXML private TextField txtGenero;
+    @FXML private ComboBox<String> comboGenero;
     @FXML private ComboBox<Director> comboDirector;
     @FXML private ImageView imgPoster;
 
@@ -58,6 +59,9 @@ public class PeliculasController implements Initializable {
     private File archivoImagenSeleccionado;
     private ResourceBundle resources;
 
+    private final Map<String, Integer> mapaGenerosNombreAId = new HashMap<>();
+    private final Map<Integer, String> mapaGenerosIdANombre = new HashMap<>();
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.resources = resourceBundle;
@@ -65,6 +69,8 @@ public class PeliculasController implements Initializable {
         peliculaDAO = new PeliculaDAO();
         directorDAO = new DirectorDAO();
         listaPeliculas = FXCollections.observableArrayList();
+
+        inicializarMapaGeneros();
 
         configurarTabla();
         configurarComboDirector();
@@ -78,8 +84,21 @@ public class PeliculasController implements Initializable {
         });
     }
 
-    private void configurarTabla() {
+    private void inicializarMapaGeneros() {
+        mapaGenerosNombreAId.put("Ciencia Ficción", 1);
+        mapaGenerosNombreAId.put("Drama", 2);
+        mapaGenerosNombreAId.put("Terror", 3);
+        mapaGenerosNombreAId.put("Comedia", 4);
+        mapaGenerosNombreAId.put("Acción", 5);
 
+        for (Map.Entry<String, Integer> entry : mapaGenerosNombreAId.entrySet()) {
+            mapaGenerosIdANombre.put(entry.getValue(), entry.getKey());
+        }
+
+        comboGenero.getItems().addAll(mapaGenerosNombreAId.keySet());
+    }
+
+    private void configurarTabla() {
         colId.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
 
@@ -89,8 +108,16 @@ public class PeliculasController implements Initializable {
         colAnio.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getAnio()));
 
-        colGenero.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getGenero()));
+        colGenero.setCellValueFactory(cellData -> {
+            try {
+                String generoRaw = String.valueOf(cellData.getValue().getGenero());
+                int idGenero = Integer.parseInt(generoRaw);
+                String nombre = mapaGenerosIdANombre.getOrDefault(idGenero, generoRaw);
+                return new javafx.beans.property.SimpleStringProperty(nombre);
+            } catch (Exception e) {
+                return new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getGenero()));
+            }
+        });
 
         colDirector.setCellValueFactory(cellData -> {
             Director d = cellData.getValue().getDirector();
@@ -134,20 +161,23 @@ public class PeliculasController implements Initializable {
                 if (newValue == null || newValue.isEmpty()) return true;
                 String lowerCaseFilter = newValue.toLowerCase();
                 if (pelicula.getTitulo() != null && pelicula.getTitulo().toLowerCase().contains(lowerCaseFilter)) return true;
-                if (pelicula.getGenero() != null && pelicula.getGenero().toLowerCase().contains(lowerCaseFilter)) return true;
+
+                int idGen = pelicula.getIdGenero();
+                String nombreGen = mapaGenerosIdANombre.get(idGen);
+                if (nombreGen != null && nombreGen.toLowerCase().contains(lowerCaseFilter)) return true;
+
                 return false;
             });
         });
         tablaPeliculas.setItems(filtro);
     }
 
-
     @FXML
     public void limpiarFormulario() {
         txtTitulo.clear();
         txtAnio.clear();
         txtDuracion.clear();
-        txtGenero.clear();
+        comboGenero.getSelectionModel().clearSelection();
         comboDirector.getSelectionModel().clearSelection();
         imgPoster.setImage(null);
         archivoImagenSeleccionado = null;
@@ -160,7 +190,18 @@ public class PeliculasController implements Initializable {
         txtTitulo.setText(p.getTitulo());
         txtAnio.setText(String.valueOf(p.getAnio()));
         txtDuracion.setText(String.valueOf(p.getDuracion()));
-        txtGenero.setText(p.getGenero());
+
+        try {
+            int idGenero = p.getIdGenero();
+            if (mapaGenerosIdANombre.containsKey(idGenero)) {
+                comboGenero.setValue(mapaGenerosIdANombre.get(idGenero));
+            } else {
+                comboGenero.setValue(null);
+            }
+        } catch (Exception e) {
+            comboGenero.setValue(null);
+        }
+
         comboDirector.setValue(p.getDirector());
 
         archivoImagenSeleccionado = null;
@@ -230,7 +271,15 @@ public class PeliculasController implements Initializable {
             int duracion = 0;
             if (!txtDuracion.getText().isEmpty()) duracion = Integer.parseInt(txtDuracion.getText());
 
-            String genero = txtGenero.getText();
+            String nombreGenero = comboGenero.getValue();
+
+            if (nombreGenero == null) {
+                mostrarAlerta("alerta.titulo.error", "Debes seleccionar un género válido", Alert.AlertType.ERROR);
+                return;
+            }
+
+            int idGenero = mapaGenerosNombreAId.get(nombreGenero);
+
             Director director = comboDirector.getValue();
 
             Pelicula peliculaGestor;
@@ -238,17 +287,19 @@ public class PeliculasController implements Initializable {
 
             if (seleccionada == null) {
                 peliculaGestor = new Pelicula();
-                peliculaGestor.setId(0); // ID temporal para inserción
+                peliculaGestor.setId(0);
             } else {
                 peliculaGestor = seleccionada;
             }
 
             peliculaGestor.setTitulo(titulo);
             peliculaGestor.setDuracion(duracion);
-            peliculaGestor.setGenero(genero);
+
+            peliculaGestor.setIdGenero(idGenero);
+
             peliculaGestor.setDirector(director);
             peliculaGestor.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
-            peliculaGestor.setRating(5.0); // Valor por defecto
+            peliculaGestor.setRating(5.0);
             peliculaGestor.setTieneOscar(false);
 
             if (archivoImagenSeleccionado != null) {
@@ -345,7 +396,6 @@ public class PeliculasController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            // USAMOS RUTA ABSOLUTA PARA EVITAR ERRORES
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
             loader.setResources(this.resources);
 
@@ -359,7 +409,6 @@ public class PeliculasController implements Initializable {
         }
     }
 
-    // --- GESTIÓN DE REPARTO ---
     @FXML
     public void gestionarReparto(ActionEvent event) {
         Pelicula seleccionada = tablaPeliculas.getSelectionModel().getSelectedItem();
@@ -369,7 +418,6 @@ public class PeliculasController implements Initializable {
         }
 
         try {
-            // USAMOS RUTA ABSOLUTA PARA EVITAR ERRORES
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/RepartoView.fxml"));
 
             Parent root = loader.load();
@@ -380,7 +428,7 @@ public class PeliculasController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Gestión de Reparto");
             stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana de atrás
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
         } catch (IOException e) {

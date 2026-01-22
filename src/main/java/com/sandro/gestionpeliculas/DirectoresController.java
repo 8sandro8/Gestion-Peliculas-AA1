@@ -4,6 +4,8 @@ import com.sandro.gestionpeliculas.dao.DirectorDAO;
 import com.sandro.gestionpeliculas.modelo.Director;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +14,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -22,7 +23,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class DirectoresController implements Initializable {
@@ -40,13 +40,38 @@ public class DirectoresController implements Initializable {
 
     private DirectorDAO directorDAO = new DirectorDAO();
     private Director directorSeleccionado = null;
+
     private ObservableList<Director> listaMaster = FXCollections.observableArrayList();
+    private FilteredList<Director> listaFiltrada;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colNacionalidad.setCellValueFactory(new PropertyValueFactory<>("nacionalidad"));
+        colId.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
+
+        colNombre.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNombre()));
+
+        colNacionalidad.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNacionalidad()));
+
+        listaFiltrada = new FilteredList<>(listaMaster, b -> true);
+
+        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
+            listaFiltrada.setPredicate(director -> {
+                if (newValue == null || newValue.isEmpty()) return true;
+
+                String lowerCaseFilter = newValue.toLowerCase();
+                if (director.getNombre() != null && director.getNombre().toLowerCase().contains(lowerCaseFilter)) return true;
+                if (director.getNacionalidad() != null && director.getNacionalidad().toLowerCase().contains(lowerCaseFilter)) return true;
+
+                return false;
+            });
+        });
+
+        SortedList<Director> sortedData = new SortedList<>(listaFiltrada);
+        sortedData.comparatorProperty().bind(tablaDirectores.comparatorProperty());
+        tablaDirectores.setItems(sortedData);
 
         cargarDirectores();
 
@@ -56,32 +81,15 @@ public class DirectoresController implements Initializable {
                 mostrarDetalles(directorSeleccionado);
             }
         });
-
-        txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrarDirectores(newVal));
     }
 
     private void cargarDirectores() {
-        tablaDirectores.getItems().clear();
-        List<Director> lista = directorDAO.obtenerTodos();
-        listaMaster = FXCollections.observableArrayList(lista);
-        tablaDirectores.setItems(listaMaster);
-    }
-
-    private void filtrarDirectores(String texto) {
-        if (texto == null || texto.isEmpty()) {
-            tablaDirectores.setItems(listaMaster);
-            return;
-        }
-        ObservableList<Director> filtro = FXCollections.observableArrayList();
-        for (Director d : listaMaster) {
-            if (d.getNombre().toLowerCase().contains(texto.toLowerCase())) {
-                filtro.add(d);
-            }
-        }
-        tablaDirectores.setItems(filtro);
+        listaMaster.clear();
+        listaMaster.addAll(directorDAO.obtenerTodos());
     }
 
     private void mostrarDetalles(Director d) {
+        if (d == null) return;
         txtNombre.setText(d.getNombre());
         txtNacionalidad.setText(d.getNacionalidad());
         txtWeb.setText(d.getWebOficial());
@@ -100,26 +108,32 @@ public class DirectoresController implements Initializable {
         String nacionalidad = txtNacionalidad.getText();
         String web = txtWeb.getText();
 
+        Director dirGestor;
         if (directorSeleccionado == null) {
-            // CREAR
-            Director nuevo = new Director(0, nombre, fecha, web, nacionalidad);
-            if (directorDAO.insertar(nuevo)) {
-                mostrarAlerta("Éxito", "Director guardado correctamente");
-                limpiarFormulario(null);
-                cargarDirectores();
-            } else {
-                mostrarAlerta("Error", "No se pudo guardar");
-            }
+            dirGestor = new Director();
         } else {
-            // ACTUALIZAR
-            Director editado = new Director(directorSeleccionado.getId(), nombre, fecha, web, nacionalidad);
-            if (directorDAO.actualizar(editado)) {
-                mostrarAlerta("Éxito", "Director actualizado");
-                limpiarFormulario(null);
-                cargarDirectores();
-            } else {
-                mostrarAlerta("Error", "No se pudo actualizar");
-            }
+            dirGestor = directorSeleccionado;
+        }
+
+        // Ajusta los setters según tu clase Director
+        dirGestor.setNombre(nombre);
+        dirGestor.setFechaNacimiento(fecha);
+        dirGestor.setNacionalidad(nacionalidad);
+        dirGestor.setWebOficial(web);
+
+        boolean exito;
+        if (directorSeleccionado == null) {
+            exito = directorDAO.insertar(dirGestor);
+        } else {
+            exito = directorDAO.actualizar(dirGestor);
+        }
+
+        if (exito) {
+            mostrarAlerta("Éxito", "Director guardado correctamente");
+            limpiarFormulario(null);
+            cargarDirectores();
+        } else {
+            mostrarAlerta("Error", "No se pudo guardar");
         }
     }
 
@@ -129,19 +143,12 @@ public class DirectoresController implements Initializable {
             mostrarAlerta("Aviso", "Selecciona un director primero");
             return;
         }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar");
-        confirm.setHeaderText("¿Borrar a " + directorSeleccionado.getNombre() + "?");
-
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            if (directorDAO.eliminar(directorSeleccionado.getId())) {
-                mostrarAlerta("Eliminado", "Director eliminado");
-                limpiarFormulario(null);
-                cargarDirectores();
-            } else {
-                mostrarAlerta("Error", "No se pudo eliminar (quizás tiene películas asignadas)");
-            }
+        if (directorDAO.eliminar(directorSeleccionado.getId())) {
+            mostrarAlerta("Eliminado", "Director eliminado");
+            limpiarFormulario(null);
+            cargarDirectores();
+        } else {
+            mostrarAlerta("Error", "No se pudo eliminar");
         }
     }
 
@@ -158,29 +165,22 @@ public class DirectoresController implements Initializable {
     @FXML
     void exportarCSV(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar Archivo CSV");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos CSV", "*.csv"));
+        fileChooser.setTitle("Guardar CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
         fileChooser.setInitialFileName("directores.csv");
-
-        Stage stage = (Stage) txtBuscar.getScene().getWindow();
-        File file = fileChooser.showSaveDialog(stage);
+        File file = fileChooser.showSaveDialog(null);
 
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write("ID;Nombre;Fecha Nacimiento;Nacionalidad;Web");
+                writer.write("ID;Nombre;Nacionalidad;Web");
                 writer.newLine();
-
                 for (Director d : listaMaster) {
-                    String fechaStr = (d.getFechaNacimiento() != null) ? d.getFechaNacimiento().toString() : "";
-                    String webStr = (d.getWebOficial() != null) ? d.getWebOficial() : "";
-
-                    writer.write(d.getId() + ";" + d.getNombre() + ";" + fechaStr + ";" + d.getNacionalidad() + ";" + webStr);
+                    writer.write(d.getId() + ";" + d.getNombre() + ";" + d.getNacionalidad() + ";" + d.getWebOficial());
                     writer.newLine();
                 }
-                mostrarAlerta("Éxito", "Directores exportados correctamente.");
+                mostrarAlerta("Éxito", "Exportado correctamente.");
             } catch (IOException e) {
-                e.printStackTrace();
-                mostrarAlerta("Error", "Error al exportar: " + e.getMessage());
+                mostrarAlerta("Error", "Fallo al exportar.");
             }
         }
     }
@@ -188,23 +188,21 @@ public class DirectoresController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            loader.setResources(bundle);
+            // ResourceBundle bundle = ResourceBundle.getBundle("...");
+            // loader.setResources(bundle);
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo volver al menú: " + e.getMessage());
+            mostrarAlerta("Error", "Error al volver: " + e.getMessage());
         }
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }

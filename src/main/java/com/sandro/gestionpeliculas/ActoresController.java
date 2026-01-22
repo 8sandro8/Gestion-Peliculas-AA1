@@ -4,6 +4,8 @@ import com.sandro.gestionpeliculas.dao.ActorDAO;
 import com.sandro.gestionpeliculas.modelo.Actor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,176 +28,216 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 public class ActoresController implements Initializable {
 
+    @FXML private TextField txtBuscar;
     @FXML private TableView<Actor> tablaActores;
     @FXML private TableColumn<Actor, Integer> colId;
     @FXML private TableColumn<Actor, String> colNombre;
     @FXML private TableColumn<Actor, String> colNacionalidad;
 
     @FXML private TextField txtNombre;
-    @FXML private TextField txtNacionalidad;
     @FXML private DatePicker dpFechaNacimiento;
+    @FXML private TextField txtNacionalidad;
     @FXML private ImageView imgFoto;
 
-    // --- VARIABLES ---
-    private ObservableList<Actor> listaActores;
-    private ActorDAO actorDAO;
+    private ActorDAO actorDAO = new ActorDAO();
+    private Actor actorSeleccionado = null;
     private File archivoImagenSeleccionado;
-    private ResourceBundle resources;
+
+    private ObservableList<Actor> listaMaster = FXCollections.observableArrayList();
+    private FilteredList<Actor> listaFiltrada;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.resources = resourceBundle;
-        actorDAO = new ActorDAO();
-        listaActores = FXCollections.observableArrayList();
+        colId.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
 
-        configurarColumnas();
+        colNombre.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNombre()));
+
+        colNacionalidad.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNacionalidad()));
+
+        listaFiltrada = new FilteredList<>(listaMaster, b -> true);
+
+        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
+            listaFiltrada.setPredicate(actor -> {
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (actor.getNombre() != null && actor.getNombre().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                }
+                if (actor.getNacionalidad() != null && actor.getNacionalidad().toLowerCase().contains(lowerCaseFilter)) {
+                    return true;
+                }
+                return false;
+            });
+        });
+
+        SortedList<Actor> sortedData = new SortedList<>(listaFiltrada);
+        sortedData.comparatorProperty().bind(tablaActores.comparatorProperty());
+        tablaActores.setItems(sortedData);
+
         cargarActores();
 
-        // Listener para selección
-        tablaActores.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldSelection, newSelection) -> mostrarDetalles(newSelection)
-        );
-    }
-
-    private void configurarColumnas() {
-        colId.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getId()));
-        colNombre.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNombre()));
-        colNacionalidad.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNacionalidad()));
+        tablaActores.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                actorSeleccionado = newSel;
+                mostrarDetalles(actorSeleccionado);
+            }
+        });
     }
 
     private void cargarActores() {
-        listaActores.clear();
-        listaActores.addAll(actorDAO.listarTodos());
-        tablaActores.setItems(listaActores);
+        listaMaster.clear();
+        listaMaster.addAll(actorDAO.obtenerTodos());
     }
 
     private void mostrarDetalles(Actor a) {
         if (a == null) return;
         txtNombre.setText(a.getNombre());
         txtNacionalidad.setText(a.getNacionalidad());
-        if (a.getFechaNacimiento() != null) {
-            dpFechaNacimiento.setValue(a.getFechaNacimiento());
-        } else {
-            dpFechaNacimiento.setValue(null);
-        }
+        if (dpFechaNacimiento != null) dpFechaNacimiento.setValue(a.getFechaNacimiento());
 
         archivoImagenSeleccionado = null;
-        if (a.getFotoUrl() != null && !a.getFotoUrl().isEmpty()) {
-            try {
-                File file = new File(a.getFotoUrl());
-                if (file.exists()) {
-                    imgFoto.setImage(new Image(file.toURI().toString()));
-                } else {
-                    imgFoto.setImage(null);
-                }
-            } catch (Exception e) { imgFoto.setImage(null); }
-        } else {
+        if (imgFoto != null) {
             imgFoto.setImage(null);
         }
     }
 
     @FXML
-    public void limpiarFormulario() {
-        txtNombre.clear();
-        txtNacionalidad.clear();
-        dpFechaNacimiento.setValue(null);
-        imgFoto.setImage(null);
-        archivoImagenSeleccionado = null;
-        tablaActores.getSelectionModel().clearSelection();
-    }
-
-    @FXML
-    public void seleccionarImagen() {
+    void seleccionarImagen(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Seleccionar Foto Actor");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes", "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.setTitle("Seleccionar Foto");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
+        );
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             archivoImagenSeleccionado = file;
-            imgFoto.setImage(new Image(file.toURI().toString()));
+            if (imgFoto != null) {
+                imgFoto.setImage(new Image(file.toURI().toString()));
+            }
         }
     }
 
-    private String copiarImagen(File archivo) {
+    private String copiarImagenAlProyecto(File archivoOriginal) {
         try {
-            Path destino = Paths.get("imagenes_actores");
-            if (!Files.exists(destino)) Files.createDirectories(destino);
-            String nombre = "actor_" + System.currentTimeMillis() + "_" + archivo.getName();
-            Path rutaFinal = destino.resolve(nombre);
-            Files.copy(archivo.toPath(), rutaFinal, StandardCopyOption.REPLACE_EXISTING);
-            return rutaFinal.toString();
-        } catch (Exception e) { return null; }
+            Path carpetaDestino = Paths.get("imagenes");
+            if (!Files.exists(carpetaDestino)) {
+                Files.createDirectories(carpetaDestino);
+            }
+            String extension = "";
+            int i = archivoOriginal.getName().lastIndexOf('.');
+            if (i > 0) extension = archivoOriginal.getName().substring(i);
+
+            String nombreFinal = "actor_" + System.currentTimeMillis() + extension;
+            Path rutaDestino = carpetaDestino.resolve(nombreFinal);
+
+            Files.copy(archivoOriginal.toPath(), rutaDestino, StandardCopyOption.REPLACE_EXISTING);
+            return rutaDestino.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @FXML
-    public void guardarActor() {
-        if (txtNombre.getText().isEmpty()) {
-            mostrarAlerta("Error", "El nombre es obligatorio", Alert.AlertType.ERROR);
+    void guardarActor(ActionEvent event) {
+        String nombre = txtNombre.getText();
+        if (nombre == null || nombre.isEmpty()) {
+            mostrarAlerta("Error", "El nombre es obligatorio");
             return;
         }
 
-        Actor actor = tablaActores.getSelectionModel().getSelectedItem();
-        boolean esNuevo = (actor == null);
-        if (esNuevo) actor = new Actor();
+        LocalDate fecha = dpFechaNacimiento.getValue();
+        String nacionalidad = txtNacionalidad.getText();
 
-        actor.setNombre(txtNombre.getText());
-        actor.setNacionalidad(txtNacionalidad.getText());
-        actor.setFechaNacimiento(dpFechaNacimiento.getValue());
+        Actor actorGestor;
+        if (actorSeleccionado == null) {
+            actorGestor = new Actor();
+        } else {
+            actorGestor = actorSeleccionado;
+        }
+
+        actorGestor.setNombre(nombre);
+        actorGestor.setFechaNacimiento(fecha);
+        actorGestor.setNacionalidad(nacionalidad);
 
         if (archivoImagenSeleccionado != null) {
-            String ruta = copiarImagen(archivoImagenSeleccionado);
-            if (ruta != null) actor.setFotoUrl(ruta);
+            String ruta = copiarImagenAlProyecto(archivoImagenSeleccionado);
         }
 
-        if (esNuevo) {
-            if (actorDAO.insertar(actor)) mostrarAlerta("Info", "Actor guardado", Alert.AlertType.INFORMATION);
+        boolean exito;
+        if (actorSeleccionado == null) {
+            exito = actorDAO.insertar(actorGestor);
         } else {
-            if (actorDAO.actualizar(actor)) mostrarAlerta("Info", "Actor actualizado", Alert.AlertType.INFORMATION);
+            exito = actorDAO.actualizar(actorGestor);
         }
-        cargarActores();
-        limpiarFormulario();
-    }
 
-    @FXML
-    public void eliminarActor() {
-        Actor actor = tablaActores.getSelectionModel().getSelectedItem();
-        if (actor == null) return;
-
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setContentText("¿Borrar a " + actor.getNombre() + "?");
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            actorDAO.eliminar(actor.getId());
+        if (exito) {
+            mostrarAlerta("Éxito", "Actor guardado correctamente");
+            limpiarFormulario(null);
             cargarActores();
-            limpiarFormulario();
+        } else {
+            mostrarAlerta("Error", "No se pudo guardar");
         }
     }
 
     @FXML
-    public void exportarCSV() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar Listado de Actores");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos CSV", "*.csv"));
-        fileChooser.setInitialFileName("actores_backup.csv");
+    void eliminarActor(ActionEvent event) {
+        if (actorSeleccionado == null) {
+            mostrarAlerta("Aviso", "Selecciona un actor primero");
+            return;
+        }
+        if (actorDAO.eliminar(actorSeleccionado.getId())) {
+            mostrarAlerta("Eliminado", "Actor eliminado");
+            limpiarFormulario(null);
+            cargarActores();
+        } else {
+            mostrarAlerta("Error", "No se pudo eliminar");
+        }
+    }
 
+    @FXML
+    void limpiarFormulario(ActionEvent event) {
+        txtNombre.clear();
+        txtNacionalidad.clear();
+        dpFechaNacimiento.setValue(null);
+        if (imgFoto != null) imgFoto.setImage(null);
+        tablaActores.getSelectionModel().clearSelection();
+        actorSeleccionado = null;
+        archivoImagenSeleccionado = null;
+    }
+
+    @FXML
+    void exportarCSV(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        fileChooser.setInitialFileName("actores.csv");
         File file = fileChooser.showSaveDialog(null);
 
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write("ID;NOMBRE;NACIONALIDAD;FECHA_NACIMIENTO\n");
-                for (Actor a : listaActores) {
-                    writer.write(String.format("%d;%s;%s;%s\n",
-                            a.getId(), a.getNombre(), a.getNacionalidad(), a.getFechaNacimiento()));
+                writer.write("ID;Nombre;Nacionalidad");
+                writer.newLine();
+                for (Actor a : listaMaster) {
+                    writer.write(a.getId() + ";" + a.getNombre() + ";" + a.getNacionalidad());
+                    writer.newLine();
                 }
-                mostrarAlerta("Info", "Exportado correctamente", Alert.AlertType.INFORMATION);
-            } catch (Exception e) {
-                mostrarAlerta("Error", "Fallo al exportar: " + e.getMessage(), Alert.AlertType.ERROR);
+                mostrarAlerta("Éxito", "Exportado correctamente.");
+            } catch (IOException e) {
+                mostrarAlerta("Error", "Fallo al exportar.");
             }
         }
     }
@@ -203,21 +245,24 @@ public class ActoresController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
+            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
-            loader.setResources(this.resources);
+            loader.setResources(bundle);
+
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo volver al menú: " + e.getMessage());
         }
     }
 
-    private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setContentText(contenido);
-        alert.showAndWait();
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }
