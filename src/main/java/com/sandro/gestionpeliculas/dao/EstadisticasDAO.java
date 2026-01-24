@@ -10,12 +10,10 @@ import java.util.Map;
 
 public class EstadisticasDAO {
 
-    // 1. Contar Películas Totales
     public int contarPeliculas() {
         return contar("SELECT COUNT(*) FROM pelicula");
     }
 
-    // 2. Contar Actores Totales
     public int contarActores() {
         return contar("SELECT COUNT(*) FROM actor");
     }
@@ -38,24 +36,36 @@ public class EstadisticasDAO {
     public Map<String, Integer> contarPeliculasPorGenero() {
         Map<String, Integer> datos = new HashMap<>();
 
-        String sql = "SELECT g.nombre, COUNT(*) as cantidad " +
-                "FROM pelicula p " +
-                "JOIN genero g ON p.id_genero = g.id " +
-                "GROUP BY g.nombre";
+        String sql = "SELECT id_genero, COUNT(*) as cantidad FROM pelicula GROUP BY id_genero";
 
         try (Connection con = ConexionBBDD.conectar();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                String genero = rs.getString(1); // Coge el nombre del género
+                // CORRECCIÓN AQUÍ: Leemos 'id_genero'
+                int idGenero = rs.getInt("id_genero");
                 int cantidad = rs.getInt("cantidad");
-                datos.put(genero, cantidad);
+
+                String nombreGenero = obtenerNombreGenero(idGenero);
+                datos.put(nombreGenero, cantidad);
             }
         } catch (Exception e) {
-            System.out.println("Error cargando gráfico: " + e.getMessage());
+            System.out.println("Error en gráfico: " + e.getMessage());
             e.printStackTrace();
         }
         return datos;
+    }
+
+    private String obtenerNombreGenero(int id) {
+        switch (id) {
+            case 1: return "Acción";
+            case 2: return "Comedia";
+            case 3: return "Drama";
+            case 4: return "Terror";
+            case 5: return "Crimen/Drama";
+            case 6: return "Ciencia Ficción";
+            default: return "Otro (" + id + ")";
+        }
     }
 }

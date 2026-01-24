@@ -26,11 +26,9 @@ public class DashboardController implements Initializable {
     @FXML private PieChart graficoGeneros;
 
     private EstadisticasDAO estadisticasDAO = new EstadisticasDAO();
-    private ResourceBundle resources;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.resources = resourceBundle; // Guardamos el idioma
         cargarDatos();
     }
 
@@ -42,34 +40,46 @@ public class DashboardController implements Initializable {
         lblTotalActores.setText(String.valueOf(totalActores));
 
         Map<String, Integer> datosGeneros = estadisticasDAO.contarPeliculasPorGenero();
-
         ObservableList<PieChart.Data> datosGrafico = FXCollections.observableArrayList();
 
         for (Map.Entry<String, Integer> entry : datosGeneros.entrySet()) {
             String nombreGenero = entry.getKey();
             Integer cantidad = entry.getValue();
-
             datosGrafico.add(new PieChart.Data(nombreGenero + " (" + cantidad + ")", cantidad));
         }
 
         graficoGeneros.setData(datosGrafico);
         graficoGeneros.setTitle("Géneros");
+        graficoGeneros.setLabelsVisible(true);
     }
 
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
+            ResourceBundle bundle = null;
+            try {
+                bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+            } catch (Exception e1) {
+                try {
+                    bundle = ResourceBundle.getBundle("mensajes");
+                } catch (Exception e2) {
+                    System.out.println("No se encontró el archivo de idiomas.");
+                }
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
 
-            loader.setResources(this.resources);
+            if (bundle != null) {
+                loader.setResources(bundle);
+            }
 
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Error al volver al menú: " + e.getMessage());
         }
     }
 }
