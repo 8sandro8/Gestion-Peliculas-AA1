@@ -10,9 +10,9 @@
 > **Curso:** 2025-2026
 
 ## 📄 Descripción
-Este proyecto es una aplicación de escritorio robusta para la gestión integral de una base de datos de cine. Ha sido desarrollada implementando una arquitectura profesional por capas (**MVC** + **DAO**) y simulando un entorno de desarrollo real con control de versiones.
+Este proyecto es una aplicación de escritorio robusta para la gestión integral de una base de datos de cine. Ha sido desarrollada implementando una arquitectura profesional por capas (**MVC** + **DAO**), priorizando la integridad referencial y simulando un entorno de desarrollo real.
 
-El sistema permite administrar películas, actores, directores y sus relaciones, ofreciendo una experiencia de usuario moderna y persistencia de datos relacional.
+El sistema permite administrar el ciclo de vida completo de películas, así como la gestión independiente de actores y directores, ofreciendo una experiencia de usuario moderna y fluida.
 
 ---
 
@@ -20,56 +20,54 @@ El sistema permite administrar películas, actores, directores y sus relaciones,
 
 ### 🛠️ Stack Tecnológico
 * **Lenguaje:** Java (JDK 21)
-* **Interfaz Gráfica:** JavaFX (Diseño modular con FXML)
+* **Interfaz Gráfica:** JavaFX (Diseño modular con FXML y CSS)
 * **Base de Datos:** MariaDB (Conector JDBC)
 * **Gestión de Dependencias:** Apache Maven
-* **Control de Versiones:** Git & GitHub (Rama `master` como principal)
+* **Control de Versiones:** Git & GitHub
 
 ### 🏗️ Arquitectura
-* **Patrón MVC:** Separación estricta entre Lógica (Modelos), Interfaz (Vistas FXML) y Controladores.
-* **Patrón DAO:** Capa de acceso a datos para desacoplar la lógica de negocio de las consultas SQL.
-* **Multihilo:** Uso de hilos secundarios para tareas pesadas (Splash Screen, cargas masivas).
+* **Patrón MVC:** Separación estricta entre Lógica (Modelo), Interfaz (Vista) y Controladores.
+* **Patrón DAO:** Capa de abstracción para persistencia de datos y desacoplamiento de SQL.
+* **Lógica Relacional:** Implementación correcta de relaciones 1:N y N:M mediante tablas intermedias.
 
 ---
 
 ## ✨ Funcionalidades Principales
 
 ### 📦 Gestión de Datos (CRUD)
-* Alta, Baja y Modificación de **Películas** y **Actores**.
-* Gestión de relaciones N:M (Reparto de actores en películas).
-* Buscadores con filtrado en tiempo real.
-* Validación de formularios con feedback visual.
+* **Gestión de Películas:** Creación y edición con asignación de Director (FK) y validaciones.
+* **Gestión de Directores:** Módulo independiente para alta y mantenimiento de directores.
+* **Gestión de Actores:** Base de datos de actores con foto y datos biográficos.
+* **Gestión de Reparto (N:M):** Asignación de actores a películas especificando personaje y rol.
+* **Buscadores:** Filtrado dinámico en tiempo real en todas las tablas.
 
-### ⭐ Extras Implementados (High Level)
+### ⭐ Extras Implementados
 Para superar los requisitos básicos, se han añadido las siguientes funcionalidades avanzadas:
 
 1.  **🌍 Internacionalización (i18n):**
-    * Soporte completo **Español / Inglés**.
-    * Cambio de idioma en caliente sin reiniciar la app.
-2.  **🖼️ Persistencia de Imágenes:**
-    * Sistema de gestión de archivos locales (`/imagenes`).
-    * Carga y visualización de pósters y fotos de actores.
+    * Soporte completo **Español / Inglés** con cambio en caliente.
+2.  **🖼️ Gestión Multimedia:**
+    * Sistema de carga y persistencia local de imágenes (Pósters y Fotos de perfil).
 3.  **📊 Dashboard de Estadísticas:**
-    * Panel visual con gráficas (PieChart y BarChart) para analizar géneros y datos de la BBDD.
-4.  **💾 Exportación CSV:**
-    * Generación de copias de seguridad de los listados en formato `.csv`.
+    * Panel visual con gráficas dinámicas para analizar la distribución de géneros y volumetría de datos.
+4.  **💾 Exportación de Datos:**
+    * Funcionalidad para exportar listados a formato `.csv`.
 5.  **🚀 Splash Screen:**
-    * Pantalla de carga inicial animada.
+    * Pantalla de carga inicial para mejorar la experiencia de usuario.
 
 ---
 
 ## 🗄️ Base de Datos (SQL)
 
-La lógica de datos se apoya en un diseño relacional complejo y optimizado.
+El diseño de la base de datos se ha refactorizado para garantizar la máxima integridad de los datos.
 
-* **Estructura:** 7 Entidades (`Pelicula`, `Actor`, `Director`, `Genero`, `Usuario`...).
+* **Estructura:** Modelo relacional normalizado (Tablas intermedias con ID propio).
 * **Programación en BBDD:**
-    * **Triggers:** Auditoría de cambios y cálculos automáticos.
-    * **Vistas:** Simplificación de consultas complejas.
-    * **Procedimientos Almacenados:** Lógica de negocio encapsulada.
-    * **Script de Parche:** Incluido para actualizaciones de estructura.
+    * **Triggers:** Control de integridad de datos (ej: validación de fechas de nacimiento y duración positiva).
+    * **Vistas:** Consultas predefinidas para rankings y catálogos complejos.
+    * **Foreign Keys:** Restricciones de integridad referencial estrictas.
 
-> 📂 **Nota:** Todos los scripts SQL, diagramas E-R y documentación de BBDD se encuentran en la carpeta: [`/Entregable_BBDD`](./Entregable_BBDD)
+> 📂 **Nota:** Todos los scripts SQL y diagramas se encuentran en la carpeta: [`/Entregable_BBDD`](./Entregable_BBDD)
 
 ---
 
@@ -80,13 +78,13 @@ La lógica de datos se apoya en un diseño relacional complejo y optimizado.
     git clone [https://github.com/8sandro8/Gestion-Peliculas-AA1.git](https://github.com/8sandro8/Gestion-Peliculas-AA1.git)
     ```
 2.  **Base de Datos:**
-    * Importar el script `AA1_Backup_Completo.sql` (ubicado en `Entregable_BBDD`) en tu servidor MariaDB.
-    * Configurar la conexión en el archivo `ConexionBBDD.java`.
+    * Ejecutar el script SQL proporcionado en `Entregable_BBDD` en tu servidor MariaDB para crear la estructura y cargar los datos iniciales.
+    * Verificar la configuración en `ConexionBBDD.java`.
 3.  **Ejecutar:**
     * Abrir el proyecto en IntelliJ IDEA.
     * Sincronizar dependencias Maven.
-    * Ejecutar la clase `App.java` o `Launcher.java`.
+    * Ejecutar la clase `App.java`.
 
 ---
 
-Copyright © 2025 - Sandro López Díaz
+Copyright © 2026 - Sandro López Díaz
