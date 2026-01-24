@@ -69,6 +69,10 @@ public class MenuPrincipalController implements Initializable {
     public void irAActores(ActionEvent event) {
         cambiarPantalla(event, "/com/sandro/gestionpeliculas/ActoresView.fxml");
     }
+    @FXML
+    public void irADirectores(ActionEvent event) {
+        cambiarPantalla(event, "/com/sandro/gestionpeliculas/DirectoresView.fxml");
+    }
 
     @FXML
     public void irADashboard(ActionEvent event) {

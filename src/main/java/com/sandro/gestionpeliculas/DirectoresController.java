@@ -115,7 +115,6 @@ public class DirectoresController implements Initializable {
             dirGestor = directorSeleccionado;
         }
 
-        // Ajusta los setters según tu clase Director
         dirGestor.setNombre(nombre);
         dirGestor.setFechaNacimiento(fecha);
         dirGestor.setNacionalidad(nacionalidad);
@@ -188,15 +187,33 @@ public class DirectoresController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("MenuPrincipal.fxml"));
-            // ResourceBundle bundle = ResourceBundle.getBundle("...");
-            // loader.setResources(bundle);
+            ResourceBundle bundle = null;
+            try {
+                // Según tu captura, esta es la ruta correcta
+                bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+            } catch (Exception e1) {
+                try {
+                    // Intento secundario por si acaso
+                    bundle = ResourceBundle.getBundle("mensajes");
+                } catch (Exception e2) {
+                    System.out.println("No se encontró el archivo de idiomas.");
+                }
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
+
+            if (bundle != null) {
+                loader.setResources(bundle);
+            }
+
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
+
         } catch (IOException e) {
-            mostrarAlerta("Error", "Error al volver: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo volver al menú.");
         }
     }
 

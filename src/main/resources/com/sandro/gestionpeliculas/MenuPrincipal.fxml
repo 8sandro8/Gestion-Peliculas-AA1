@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: #1e1e2e;" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandro.gestionpeliculas.MenuPrincipalController">
     <children>
         <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
@@ -13,7 +14,6 @@
                 <HBox alignment="CENTER" spacing="20.0">
                     <children>
                         <Button onAction="#cambiarEspanol" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #a6adc8; -fx-border-color: #585b70; -fx-border-radius: 5; -fx-border-width: 2px;" text="ES" />
-
                         <Button onAction="#cambiarIngles" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #a6adc8; -fx-border-color: #585b70; -fx-border-radius: 5; -fx-border-width: 2px;" text="EN" />
                     </children>
                 </HBox>
@@ -27,6 +27,12 @@
                 </Button>
 
                 <Button maxWidth="Infinity" onAction="#irAActores" style="-fx-background-color: #a6e3a1; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="%menu.artistas">
+                    <padding>
+                        <Insets bottom="15.0" top="15.0" />
+                    </padding>
+                </Button>
+
+                <Button maxWidth="Infinity" onAction="#irADirectores" style="-fx-background-color: #fab387; -fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 14px;" text="🎬 GESTIONAR DIRECTORES">
                     <padding>
                         <Insets bottom="15.0" top="15.0" />
                     </padding>

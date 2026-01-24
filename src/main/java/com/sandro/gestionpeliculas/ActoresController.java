@@ -110,6 +110,17 @@ public class ActoresController implements Initializable {
         archivoImagenSeleccionado = null;
         if (imgFoto != null) {
             imgFoto.setImage(null);
+
+            if (a.getFotoUrl() != null && !a.getFotoUrl().isEmpty()) {
+                try {
+                    File file = new File(a.getFotoUrl());
+                    if (file.exists()) {
+                        imgFoto.setImage(new Image(file.toURI().toString()));
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error cargando imagen: " + e.getMessage());
+                }
+            }
         }
     }
 
@@ -175,6 +186,9 @@ public class ActoresController implements Initializable {
 
         if (archivoImagenSeleccionado != null) {
             String ruta = copiarImagenAlProyecto(archivoImagenSeleccionado);
+            if (ruta != null) {
+                actorGestor.setFotoUrl(ruta);
+            }
         }
 
         boolean exito;
@@ -245,9 +259,21 @@ public class ActoresController implements Initializable {
     @FXML
     public void volverAlMenu(ActionEvent event) {
         try {
-            ResourceBundle bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+            ResourceBundle bundle = null;
+            try {
+                bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
+            } catch (Exception e1) {
+                try {
+                    bundle = ResourceBundle.getBundle("mensajes");
+                } catch (Exception e2) {
+                    System.out.println("No se encontró el archivo de idiomas.");
+                }
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));
-            loader.setResources(bundle);
+            if (bundle != null) {
+                loader.setResources(bundle);
+            }
 
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
