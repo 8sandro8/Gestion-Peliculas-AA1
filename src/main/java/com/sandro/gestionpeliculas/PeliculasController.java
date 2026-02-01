@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,7 +150,7 @@ public class PeliculasController implements Initializable {
         try {
             comboDirector.setItems(FXCollections.observableArrayList(directorDAO.listarTodos()));
         } catch (Exception e) {
-            System.out.println("Error al cargar directores: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -294,12 +295,11 @@ public class PeliculasController implements Initializable {
 
             peliculaGestor.setTitulo(titulo);
             peliculaGestor.setDuracion(duracion);
-
             peliculaGestor.setIdGenero(idGenero);
-
             peliculaGestor.setDirector(director);
             peliculaGestor.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
             peliculaGestor.setRating(5.0);
+            peliculaGestor.setPresupuesto(0.0);
             peliculaGestor.setTieneOscar(false);
 
             if (archivoImagenSeleccionado != null) {
@@ -309,18 +309,12 @@ public class PeliculasController implements Initializable {
                 }
             }
 
-            if (seleccionada == null) {
-                if (peliculaDAO.insertar(peliculaGestor)) {
-                    mostrarAlerta("alerta.titulo.info", "Película guardada correctamente", Alert.AlertType.INFORMATION);
-                } else {
-                    mostrarAlerta("alerta.titulo.error", "No se pudo guardar la película", Alert.AlertType.ERROR);
-                }
+            if (peliculaGestor.getId() == 0) {
+                peliculaDAO.insertar(peliculaGestor);
+                mostrarAlerta("alerta.titulo.info", "Película guardada correctamente", Alert.AlertType.INFORMATION);
             } else {
-                if (peliculaDAO.actualizar(peliculaGestor)) {
-                    mostrarAlerta("alerta.titulo.info", "Película actualizada correctamente", Alert.AlertType.INFORMATION);
-                } else {
-                    mostrarAlerta("alerta.titulo.error", "No se pudo actualizar", Alert.AlertType.ERROR);
-                }
+                peliculaDAO.actualizar(peliculaGestor);
+                mostrarAlerta("alerta.titulo.info", "Película actualizada correctamente", Alert.AlertType.INFORMATION);
             }
 
             cargarDatos();
@@ -328,8 +322,21 @@ public class PeliculasController implements Initializable {
 
         } catch (NumberFormatException e) {
             mostrarAlerta("alerta.titulo.error", "El año y la duración deben ser números enteros", Alert.AlertType.ERROR);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            String mensajeError = "Error en la base de datos.";
+
+            if (e.getMessage().contains("CRITICAL ERROR")) {
+                mensajeError = "INTEGRIDAD DE DATOS:\nLa duración no puede ser negativa o cero.";
+            } else if (e.getMessage().contains("duracion")) {
+                mensajeError = "Revisa la duración introducida.";
+            } else {
+                mensajeError = "Detalle: " + e.getMessage();
+            }
+
+            mostrarAlerta("Error de Base de Datos", mensajeError, Alert.AlertType.ERROR);
         } catch (Exception e) {
-            mostrarAlerta("alerta.titulo.error", "Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
+            mostrarAlerta("alerta.titulo.error", "Error inesperado: " + e.getMessage(), Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }

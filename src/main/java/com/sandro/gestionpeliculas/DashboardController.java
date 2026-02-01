@@ -59,12 +59,8 @@ public class DashboardController implements Initializable {
             ResourceBundle bundle = null;
             try {
                 bundle = ResourceBundle.getBundle("com.sandro.gestionpeliculas.mensajes");
-            } catch (Exception e1) {
-                try {
-                    bundle = ResourceBundle.getBundle("mensajes");
-                } catch (Exception e2) {
-                    System.out.println("No se encontró el archivo de idiomas.");
-                }
+            } catch (Exception e) {
+                // Idioma por defecto si falla
             }
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sandro/gestionpeliculas/MenuPrincipal.fxml"));

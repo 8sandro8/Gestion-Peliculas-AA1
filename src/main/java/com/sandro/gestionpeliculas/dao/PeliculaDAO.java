@@ -13,22 +13,18 @@ public class PeliculaDAO {
 
     private DirectorDAO directorDAO = new DirectorDAO();
 
-    // --- METODO 1: LISTAR TODAS  ---
     public List<Pelicula> listarTodas() {
         List<Pelicula> lista = new ArrayList<>();
         String sql = "SELECT * FROM pelicula";
 
         Connection con = ConexionBBDD.conectar();
         if (con == null) {
-            System.out.println("❌ No hay conexión en PeliculaDAO");
             return lista;
         }
 
         try {
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
-
-            System.out.println("🔍 Buscando películas..."); // Debug
 
             while (rs.next()) {
                 try {
@@ -42,7 +38,6 @@ public class PeliculaDAO {
                     p.setCartelUrl(rs.getString("cartel_url"));
                     p.setIdGenero(rs.getInt("id_genero"));
 
-                    // --- FECHA ---
                     try {
                         Date fechaSql = rs.getDate("fecha_lanzamiento");
                         if (fechaSql != null) {
@@ -55,12 +50,10 @@ public class PeliculaDAO {
                             int anio = rs.getInt("anio");
                             p.setFechaLanzamiento(LocalDate.of(anio, 1, 1));
                         } catch (Exception ex) {
-                            System.out.println("⚠️ No se encontró columna fecha_lanzamiento ni anio. Usando fecha actual.");
                             p.setFechaLanzamiento(LocalDate.now());
                         }
                     }
 
-                    // --- DIRECTOR ---
                     int idDirector = rs.getInt("id_director");
                     p.setIdDirector(idDirector);
 
@@ -70,10 +63,8 @@ public class PeliculaDAO {
                     }
 
                     lista.add(p);
-                    System.out.println("✅ Película cargada: " + p.getTitulo());
 
                 } catch (Exception e) {
-                    System.out.println("❌ Error leyendo una fila de película (saltando...): " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -81,21 +72,20 @@ public class PeliculaDAO {
             st.close();
             con.close();
         } catch (SQLException e) {
-            System.out.println("❌ Error general al listar películas: " + e.getMessage());
             e.printStackTrace();
         }
         return lista;
     }
 
-    // --- MÉTODO 2: INSERTAR ---
-    public boolean insertar(Pelicula p) {
+    public void insertar(Pelicula p) throws SQLException {
         String sql = "INSERT INTO pelicula (titulo, fecha_lanzamiento, duracion, presupuesto, es_mas_18, cartel_url, id_genero, id_director) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection con = ConexionBBDD.conectar();
-        if (con == null) return false;
+        if (con == null) throw new SQLException("Error de conexión");
 
+        PreparedStatement st = null;
         try {
-            PreparedStatement st = con.prepareStatement(sql);
+            st = con.prepareStatement(sql);
             st.setString(1, p.getTitulo());
             st.setDate(2, Date.valueOf(p.getFechaLanzamiento()));
             st.setInt(3, p.getDuracion());
@@ -110,25 +100,23 @@ public class PeliculaDAO {
                 st.setInt(8, p.getIdDirector());
             }
 
-            int filas = st.executeUpdate();
-            st.close();
-            con.close();
-            return filas > 0;
-        } catch (SQLException e) {
-            System.out.println("❌ Error al insertar: " + e.getMessage());
-            return false;
+            st.executeUpdate();
+
+        } finally {
+            if (st != null) st.close();
+            if (con != null) con.close();
         }
     }
 
-    // --- MÉTODO 3: ACTUALIZAR ---
-    public boolean actualizar(Pelicula p) {
+    public void actualizar(Pelicula p) throws SQLException {
         String sql = "UPDATE pelicula SET titulo=?, fecha_lanzamiento=?, duracion=?, presupuesto=?, es_mas_18=?, cartel_url=?, id_genero=?, id_director=? WHERE id=?";
 
         Connection con = ConexionBBDD.conectar();
-        if (con == null) return false;
+        if (con == null) throw new SQLException("Error de conexión");
 
+        PreparedStatement st = null;
         try {
-            PreparedStatement st = con.prepareStatement(sql);
+            st = con.prepareStatement(sql);
             st.setString(1, p.getTitulo());
             st.setDate(2, Date.valueOf(p.getFechaLanzamiento()));
             st.setInt(3, p.getDuracion());
@@ -145,17 +133,14 @@ public class PeliculaDAO {
 
             st.setInt(9, p.getId());
 
-            int filas = st.executeUpdate();
-            st.close();
-            con.close();
-            return filas > 0;
-        } catch (SQLException e) {
-            System.out.println("❌ Error al actualizar: " + e.getMessage());
-            return false;
+            st.executeUpdate();
+
+        } finally {
+            if (st != null) st.close();
+            if (con != null) con.close();
         }
     }
 
-    // --- MÉTODO 4: ELIMINAR ---
     public boolean eliminar(int id) {
         String sqlBorrarPeli = "DELETE FROM pelicula WHERE id = ?";
 
@@ -170,7 +155,6 @@ public class PeliculaDAO {
             con.close();
             return filas > 0;
         } catch (SQLException e) {
-            System.out.println("❌ Error al eliminar: " + e.getMessage());
             return false;
         }
     }

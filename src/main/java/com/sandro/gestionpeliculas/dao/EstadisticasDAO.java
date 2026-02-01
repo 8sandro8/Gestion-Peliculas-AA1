@@ -36,36 +36,23 @@ public class EstadisticasDAO {
     public Map<String, Integer> contarPeliculasPorGenero() {
         Map<String, Integer> datos = new HashMap<>();
 
-        String sql = "SELECT id_genero, COUNT(*) as cantidad FROM pelicula GROUP BY id_genero";
+        String sql = "SELECT g.nombre, COUNT(p.id) as cantidad " +
+                "FROM pelicula p " +
+                "JOIN genero g ON p.id_genero = g.id " +
+                "GROUP BY g.nombre";
 
         try (Connection con = ConexionBBDD.conectar();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                // CORRECCIÓN AQUÍ: Leemos 'id_genero'
-                int idGenero = rs.getInt("id_genero");
+                String nombreGenero = rs.getString("nombre");
                 int cantidad = rs.getInt("cantidad");
-
-                String nombreGenero = obtenerNombreGenero(idGenero);
                 datos.put(nombreGenero, cantidad);
             }
         } catch (Exception e) {
-            System.out.println("Error en gráfico: " + e.getMessage());
             e.printStackTrace();
         }
         return datos;
-    }
-
-    private String obtenerNombreGenero(int id) {
-        switch (id) {
-            case 1: return "Acción";
-            case 2: return "Comedia";
-            case 3: return "Drama";
-            case 4: return "Terror";
-            case 5: return "Crimen/Drama";
-            case 6: return "Ciencia Ficción";
-            default: return "Otro (" + id + ")";
-        }
     }
 }
