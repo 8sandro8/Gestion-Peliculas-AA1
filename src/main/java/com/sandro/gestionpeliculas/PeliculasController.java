@@ -110,14 +110,9 @@ public class PeliculasController implements Initializable {
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getAnio()));
 
         colGenero.setCellValueFactory(cellData -> {
-            try {
-                String generoRaw = String.valueOf(cellData.getValue().getGenero());
-                int idGenero = Integer.parseInt(generoRaw);
-                String nombre = mapaGenerosIdANombre.getOrDefault(idGenero, generoRaw);
-                return new javafx.beans.property.SimpleStringProperty(nombre);
-            } catch (Exception e) {
-                return new javafx.beans.property.SimpleStringProperty(String.valueOf(cellData.getValue().getGenero()));
-            }
+            int idGenero = cellData.getValue().getIdGenero();
+            String nombre = mapaGenerosIdANombre.getOrDefault(idGenero, "");
+            return new javafx.beans.property.SimpleStringProperty(nombre);
         });
 
         colDirector.setCellValueFactory(cellData -> {
